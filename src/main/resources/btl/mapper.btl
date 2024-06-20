@@ -1,0 +1,13 @@
+package ${entity.daoPackage};
+
+import ${entity.entityPackage}.${entity.className};
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+
+import java.util.List;
+
+/**
+ * @author ${entity.author}
+ */
+public interface ${entity.className}Mapper extends BaseMapper<${entity.className}> {
+
+}

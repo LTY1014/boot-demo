@@ -1,0 +1,116 @@
+package ${entity.controllerPackage};
+
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lty.common.*;
+import com.lty.exception.BusinessException;
+
+import ${entity.entityPackage}.${entity.className};
+import ${entity.servicePackage}.${entity.className}Service;
+import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import java.util.List;
+
+/**
+ * @author ${entity.author}
+ */
+@Slf4j
+@RestController
+@RequestMapping("/${entity.classNameLowerCase}")
+public class ${entity.className}Controller {
+
+    @Resource
+    private ${entity.className}Service ${entity.classNameLowerCase}Service;
+
+    @ApiOperation(value = "添加")
+    @PostMapping("/add")
+    public BaseResponse<Long> add${entity.className}(@RequestBody ${entity.className} ${entity.classNameLowerCase}AddRequest) {
+        if (${entity.classNameLowerCase}AddRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        ${entity.className} ${entity.classNameLowerCase} = new ${entity.className}();
+        BeanUtils.copyProperties(${entity.classNameLowerCase}AddRequest, ${entity.classNameLowerCase});
+        boolean result = ${entity.classNameLowerCase}Service.save(${entity.classNameLowerCase});
+        if (!result) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR);
+        }
+        return ResultUtils.success(${entity.classNameLowerCase}.getId());
+    }
+
+
+    @ApiOperation(value = "修改")
+    @PostMapping("/update")
+    public BaseResponse<Boolean> update${entity.className}(@RequestBody ${entity.className} ${entity.classNameLowerCase}UpdateRequest) {
+        if (${entity.classNameLowerCase}UpdateRequest == null || ${entity.classNameLowerCase}UpdateRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR);
+        }
+        ${entity.className} ${entity.classNameLowerCase} = new ${entity.className}();
+        BeanUtils.copyProperties(${entity.classNameLowerCase}UpdateRequest, ${entity.classNameLowerCase});
+        ${entity.className} old${entity.className} = ${entity.classNameLowerCase}Service.getById(${entity.classNameLowerCase}UpdateRequest.getId());
+        if (old${entity.className} == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        boolean result = ${entity.classNameLowerCase}Service.updateById(${entity.classNameLowerCase});
+        return ResultUtils.success(result);
+    }
+
+    @ApiOperation(value = "通过id获取")
+    @GetMapping(value = "/get/{id}")
+    public BaseResponse<${entity.className}> getBy${entity.className}Id(@PathVariable ${entity.primaryKeyType} id) {
+        if (id <= 0) {
+           throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        ${entity.className} ${entity.classNameLowerCase} = ${entity.classNameLowerCase}Service.getById(id);
+        return ResultUtils.success(${entity.classNameLowerCase});
+    }
+
+    @ApiOperation(value = "列表获取")
+    @GetMapping(value = "/list")
+    public BaseResponse<List<${entity.className}>> list${entity.className}(${entity.className} ${entity.classNameLowerCase}) {
+        Wrapper<${entity.className}> qw = this.buildQueryWrapper(${entity.classNameLowerCase});
+        List<${entity.className}> ${entity.classNameLowerCase}List = ${entity.classNameLowerCase}Service.list(qw);
+        return ResultUtils.success(${entity.classNameLowerCase}List);
+    }
+
+    @ApiOperation(value = "分页获取")
+    @GetMapping(value = "/list/page")
+    public BaseResponse<Page<${entity.className}>> list${entity.className}ByPage(PageRequest pageRequest, ${entity.className} ${entity.classNameLowerCase}) {
+        // 分页基本字段
+        long current = pageRequest.getCurrent();
+        long size = pageRequest.getPageSize();
+        // 反爬虫
+        if (size > 50) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "查询数量过多");
+        }
+        Page<${entity.className}> page = new Page<>(current,size);
+        Page<${entity.className}> ${entity.classNameLowerCase}Page = ${entity.classNameLowerCase}Service.page(page, this.buildQueryWrapper(${entity.classNameLowerCase}));
+        return ResultUtils.success(${entity.classNameLowerCase}Page);
+    }
+
+    @ApiOperation(value = "删除")
+    @PostMapping("/delete")
+    public BaseResponse<Boolean> delete${entity.className}(@RequestBody DeleteRequest deleteRequest) {
+        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = deleteRequest.getId();
+        ${entity.className} old${entity.className} = ${entity.classNameLowerCase}Service.getById(id);
+        if (old${entity.className} == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        boolean b = ${entity.classNameLowerCase}Service.removeById(id);
+        return ResultUtils.success(b);
+    }
+    
+    public Wrapper<${entity.className}> buildQueryWrapper(${entity.className} ${entity.classNameLowerCase}) {
+        QueryWrapper<${entity.className}> qw = new QueryWrapper<>();
+        // TODO 添加查询条件
+
+        return qw;
+    }
+}

@@ -1,0 +1,5 @@
+${AnsiColor.BLUE}
+Application Name: ${spring.application.name}
+Server Port: ${server.port}
+author: lty
+访问地址: http://127.0.0.1:${server.port}${server.servlet.context-path}/doc.html

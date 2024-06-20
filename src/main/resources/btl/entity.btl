@@ -1,0 +1,54 @@
+package ${entity.entityPackage};
+
+import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+import lombok.experimental.Accessors;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.io.Serializable;
+import java.util.Date;
+
+/**
+ * ${entity.description}
+ * @author ${entity.author}
+ */
+@Data
+@Accessors(chain = true)
+@TableName("${entity.tableName}")
+public class ${entity.className} implements Serializable {
+    /**
+     * id
+     */
+    @TableId(type = IdType.AUTO)
+    private Long id;
+
+    <%
+    if(entity.commonFiled){
+    %>
+    /**
+     * 创建时间
+     */
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date createTime;
+
+    /**
+     * 更新时间
+     */
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date updateTime;
+
+    /**
+     * 是否删除
+     */
+    @TableLogic
+    private Integer isDelete;
+
+    @TableField(exist = false)
+    private static final long serialVersionUID = 1L;
+    <%
+    }
+    %>
+}

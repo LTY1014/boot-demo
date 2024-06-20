@@ -1,0 +1,12 @@
+package ${entity.servicePackage};
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.IService;
+import ${entity.entityPackage}.${entity.className};
+
+/**
+ * @author ${entity.author}
+ */
+public interface ${entity.className}Service extends IService<${entity.className}> {
+
+}
