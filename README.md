@@ -17,3 +17,57 @@
 
 
 
+
+
+## JPA
+
+- 导入依赖
+
+```
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+```
+
+
+
+- yml配置
+
+```
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        # 驼峰命名
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: true
+    # 默认引擎为InnoDB
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+```
+
+
+
+- **实体类**
+
+ @Entity // 作为 hibernate实体类
+ @Table(name = "tb_name") // 配置数据库表的名称,实体类中属性和表中字段的映射关系
+
+
+
+- 具体测试看JpaTest
+
+
+
+
+
+## Knife4j
+
+接口文档
+
+
+
+## beetl
+
+代码生成
