@@ -125,6 +125,12 @@
             <artifactId>beetl</artifactId>
             <version>2.9.10</version>
         </dependency>
+        <!--excel-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>easyexcel</artifactId>
+            <version>3.1.0</version>
+        </dependency>
     </dependencies>
 
     <!--多环境打包-->
