@@ -131,6 +131,12 @@
             <artifactId>easyexcel</artifactId>
             <version>3.1.0</version>
         </dependency>
+        <!--报表-->
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>6.17.0</version>
+        </dependency>
     </dependencies>
 
     <!--多环境打包-->
