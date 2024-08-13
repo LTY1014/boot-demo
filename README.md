@@ -71,3 +71,49 @@ spring:
 ## beetl
 
 代码生成
+
+
+
+### MybaisPlus
+
+自定义生成主键策略
+
+- 定义主键策略
+
+```
+public class CustomIdGenerator implements IdentifierGenerator  {
+
+    @Override
+    public Long nextId(Object entity) {
+        String serialId = SerialUtil.generateSerial();
+        return Long.valueOf(serialId);
+    }
+}
+```
+
+
+
+- 注入
+
+```
+@Configuration
+@MapperScan({"com.lty.mapper","com.lty.*.mapper"})
+public class MybatisPlusConfig {
+
+    //@Bean
+    //public IdentifierGenerator identifierGenerator() {
+    //    return new CustomIdGenerator();
+    //}
+}
+
+```
+
+
+
+- 注解使用
+
+```
+@TableId(type = IdType.ASSIGN_ID, value = "id")
+private String id;
+```
+
