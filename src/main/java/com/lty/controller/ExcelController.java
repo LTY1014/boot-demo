@@ -1,9 +1,8 @@
 package com.lty.controller;
 
 import com.lty.model.entity.Book;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import io.swagger.annotations.ApiOperation;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -22,6 +22,7 @@ import java.util.List;
 @RequestMapping("/excel")
 public class ExcelController {
 
+    @ApiOperation(value = "导出到Excel", produces = "application/octet-stream")
     @GetMapping("/export")
     public void exportBooksToExcel(HttpServletResponse response) {
         // 假设这里是生成的书籍数据
@@ -92,6 +93,42 @@ public class ExcelController {
 
         System.out.println("Imported books: " + books);
         return books;
+    }
+
+    @GetMapping("/template")
+    public void exportTemplateToExcel(HttpServletResponse response) {
+        // 创建一个新的Excel工作簿
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("sheet");
+        List<String> titleList = Arrays.asList("ID", "Book Name", "Author", "Create Time", "Update Time", "Is Delete");
+
+        writeTitle(sheet, 0, titleList);
+
+        // 设置响应头信息
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=template.xlsx");
+
+        // 写入输出流
+        try {
+            workbook.write(response.getOutputStream());
+            workbook.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 生成模板
+    private void writeTitle(Sheet sheet, int rowNum, List<String> titleValue) {
+        Row titleRow = sheet.createRow(rowNum);
+        for (int i = 0; i < titleValue.size(); i++) {
+            titleRow.createCell(i).setCellValue(titleValue.get(i));
+        }
+    }
+
+    // 获取单元格中的字符串值
+    public static String getStringCellValue(Cell cell) {
+        cell.setCellType(CellType.STRING);
+        return cell.getStringCellValue().trim();
     }
 
     // 这里假设一个简单的数据生成方法
