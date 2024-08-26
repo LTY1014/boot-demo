@@ -102,7 +102,7 @@ public class ExcelController {
         Sheet sheet = workbook.createSheet("sheet");
         List<String> titleList = Arrays.asList("ID", "Book Name", "Author", "Create Time", "Update Time", "Is Delete");
 
-        writeTitle(sheet, 0, titleList);
+        writeCell(sheet, 0, titleList);
 
         // 设置响应头信息
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -117,15 +117,24 @@ public class ExcelController {
         }
     }
 
-    // 生成模板
-    private void writeTitle(Sheet sheet, int rowNum, List<String> titleValue) {
+    /**
+     * 写入标题
+     * @param sheet
+     * @param rowNum 行号默认0开始
+     * @param cellValue
+     */
+    private void writeCell(Sheet sheet, int rowNum, List<String> cellValue) {
         Row titleRow = sheet.createRow(rowNum);
-        for (int i = 0; i < titleValue.size(); i++) {
-            titleRow.createCell(i).setCellValue(titleValue.get(i));
+        for (int i = 0; i < cellValue.size(); i++) {
+            titleRow.createCell(i).setCellValue(cellValue.get(i));
         }
     }
 
-    // 获取单元格中的字符串值
+    /**
+     * 获取单元格中的字符串值
+     * @param cell
+     * @return
+     */
     public static String getStringCellValue(Cell cell) {
         cell.setCellType(CellType.STRING);
         return cell.getStringCellValue().trim();
