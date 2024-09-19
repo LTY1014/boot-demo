@@ -31,6 +31,18 @@ spring:
       # 驼峰命名
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
+  mail:
+    defaultEncoding: UTF-8
+    host: smtp.163.com
+    port: 465
+    username: xxx@163.com
+    password: xxx
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+
 mybatis-plus:
   #mapper路径
   mapper-locations: classpath:mapper/*.xml
