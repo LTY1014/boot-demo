@@ -20,6 +20,12 @@ public class BaseUtil {
         return value.matches(SQL_PATTERN);
     }
 
+    /**
+     * 获取对象大小(单位：字节)
+     * @param bean
+     * @param <T>
+     * @return
+     */
     public static <T> long getMemorySize(T bean){
         return VM.current().sizeOf(bean);
     }
