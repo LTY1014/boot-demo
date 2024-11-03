@@ -4,7 +4,10 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
-public class BigDecimalUtil {
+/**
+ * 比例工具类
+ */
+public class RatioUtil {
 
     public final static BigDecimal HUNDRED = new BigDecimal("100");
 
@@ -38,5 +41,18 @@ public class BigDecimalUtil {
 
         BigDecimal sum = bigDecimal1.add(bigDecimal2);
         return sum.compareTo(HUNDRED) == 0;
+    }
+
+    /**
+     * 将数字转换为百分比。
+     *
+     * @param number 要转换的数字
+     * @return 转换后的百分比值
+     */
+    public static BigDecimal getPercent(BigDecimal number) {
+        if (number.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
+        return number.multiply(new BigDecimal("0.01"));
     }
 }

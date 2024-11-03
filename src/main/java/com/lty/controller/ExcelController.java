@@ -2,14 +2,26 @@ package com.lty.controller;
 
 import com.lty.model.entity.Book;
 import io.swagger.annotations.ApiOperation;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -23,42 +35,45 @@ import java.util.List;
 public class ExcelController {
 
     @ApiOperation(value = "导出到Excel", produces = "application/octet-stream")
-    @GetMapping("/export")
+    @PostMapping("/export")
     public void exportBooksToExcel(HttpServletResponse response) {
         // 假设这里是生成的书籍数据
         List<Book> books = generateDummyBooks();
-
-        // 创建一个新的Excel工作簿
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Books");
-
-        // 创建表头
-        Row headerRow = sheet.createRow(0);
-        headerRow.createCell(0).setCellValue("ID");
-        headerRow.createCell(1).setCellValue("Book Name");
-        headerRow.createCell(2).setCellValue("Author");
-        headerRow.createCell(3).setCellValue("Create Time");
-        headerRow.createCell(4).setCellValue("Update Time");
-        headerRow.createCell(5).setCellValue("Is Delete");
-
-        // 写入数据
-        int rowNum = 1;
-        for (Book book : books) {
-            Row row = sheet.createRow(rowNum++);
-            row.createCell(0).setCellValue(book.getId());
-            row.createCell(1).setCellValue(book.getBookName());
-            row.createCell(2).setCellValue(book.getAuthor());
-            row.createCell(3).setCellValue(book.getCreateTime().toString());
-            row.createCell(4).setCellValue(book.getUpdateTime().toString());
-            row.createCell(5).setCellValue(book.getIsDelete());
-        }
-
-        // 设置响应头信息
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=books.xlsx");
-
         // 写入输出流
         try {
+
+            // 创建一个新的Excel工作簿
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("Books");
+
+            // 创建表头
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("ID");
+            headerRow.createCell(1).setCellValue("Book Name");
+            headerRow.createCell(2).setCellValue("Author");
+            headerRow.createCell(3).setCellValue("Create Time");
+            headerRow.createCell(4).setCellValue("Update Time");
+            headerRow.createCell(5).setCellValue("Is Delete");
+
+            // 写入数据
+            int rowNum = 1;
+            for (Book book : books) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(book.getId());
+                row.createCell(1).setCellValue(book.getBookName());
+                row.createCell(2).setCellValue(book.getAuthor());
+                row.createCell(3).setCellValue(book.getCreateTime().toString());
+                row.createCell(4).setCellValue(book.getUpdateTime().toString());
+                row.createCell(5).setCellValue(book.getIsDelete());
+            }
+
+            // 设置HTTP响应头
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            String fileName = "导出到Excel_" + timestamp + ".xlsx";
+            fileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20");
+            response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+
             workbook.write(response.getOutputStream());
             workbook.close();
         } catch (IOException e) {
@@ -119,8 +134,9 @@ public class ExcelController {
 
     /**
      * 写入标题
+     *
      * @param sheet
-     * @param rowNum 行号默认0开始
+     * @param rowNum    行号默认0开始
      * @param cellValue
      */
     private void writeCell(Sheet sheet, int rowNum, List<String> cellValue) {
@@ -132,6 +148,7 @@ public class ExcelController {
 
     /**
      * 获取单元格中的字符串值
+     *
      * @param cell
      * @return
      */
