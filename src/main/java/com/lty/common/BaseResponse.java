@@ -1,6 +1,7 @@
 package com.lty.common;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -10,6 +11,7 @@ import java.io.Serializable;
  * @param <T>
  * @author lty
  */
+@NoArgsConstructor
 @Data
 public class BaseResponse<T> implements Serializable {
 
