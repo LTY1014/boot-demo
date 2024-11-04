@@ -117,3 +117,25 @@ public class MybatisPlusConfig {
 private String id;
 ```
 
+
+
+
+
+## 系统参数
+
+
+
+单元测试
+
+```
+    @Test
+    public void test() {
+        //SystemParameter parameter = systemParameterService.getById(1L);
+        //Boolean convert = ConversionUtil.convert(parameter.getValue(), Boolean.class);
+        //System.out.println(convert);
+
+        Boolean test = systemParameterService.getValue("test",Boolean.class);
+        System.out.println(test);
+    }
+```
+

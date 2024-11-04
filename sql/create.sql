@@ -31,3 +31,20 @@ create table book
     isDelete   tinyint  default 0                 not null comment '是否删除'
 )
     comment '书';
+
+create table system_parameter
+(
+    id           bigint auto_increment comment 'id'
+        primary key,
+    code         varchar(64)                              not null comment '代码',
+    value        varchar(64)                              null comment '参数值',
+    defaultValue varchar(32)                              null comment '默认值',
+    description  varchar(512)                             null comment '描述',
+    type         varchar(255)                             null comment '分类',
+    remark       varchar(1024)                            null comment '备注',
+    sortable     decimal(10, 2) default 100.00            not null comment '排序',
+    createTime   datetime       default CURRENT_TIMESTAMP null comment '创建时间',
+    updateTime   datetime       default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    isDelete     tinyint        default 0                 not null comment '是否删除'
+)
+    comment '系统参数';
