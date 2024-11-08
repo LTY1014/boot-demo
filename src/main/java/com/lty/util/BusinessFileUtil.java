@@ -1,9 +1,8 @@
 package com.lty.util;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 
-import java.io.File;
+import java.io.InputStream;
 
 /**
  * 文件大小工具类
@@ -35,12 +34,12 @@ public class BusinessFileUtil {
     /**
      * 获取文件MD5
      *
-     * @param file
+     * @param inputStream
      * @return
      * @throws Exception
      */
-    private String getFileMd5(File file) throws Exception {
-        return DigestUtil.md5Hex(FileUtil.readBytes(file));
+    public static String getFileMd5(InputStream inputStream) throws Exception {
+        return DigestUtil.md5Hex(inputStream);
     }
 
     public static void main(String[] args) {

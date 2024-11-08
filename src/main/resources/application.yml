@@ -61,6 +61,10 @@ mybatis-plus:
     #打印SQL日志
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
+# 接口文档增强UI Swagger界面内容配置
+knife4j:
+  enable: true
+
 # 配置文件加密
 jasypt:
   encryptor:
