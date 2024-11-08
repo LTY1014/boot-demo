@@ -23,7 +23,7 @@ public class ExcelUtil {
      * @param dataIndex 数据行下标
      * @param redIndex 符合条件的列下标，字体为红色
      */
-    private void writeData(Sheet sheet, List<String> dataValue, Integer dataIndex, List<Integer> redIndex) {
+    public static void writeData(Sheet sheet, List<String> dataValue, Integer dataIndex, List<Integer> redIndex) {
         Workbook workbook = sheet.getWorkbook();
         CellStyle redFontCellStyle = workbook.createCellStyle();
         Font redFont = workbook.createFont();

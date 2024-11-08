@@ -1,16 +1,19 @@
 package com.lty.controller;
 
+import com.lty.common.ErrorCode;
+import com.lty.exception.BusinessException;
 import com.lty.model.entity.Book;
+import com.lty.util.ExcelUtil;
 import io.swagger.annotations.ApiOperation;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -44,7 +48,7 @@ public class ExcelController {
 
             // 创建一个新的Excel工作簿
             Workbook workbook = new XSSFWorkbook();
-            Sheet sheet = workbook.createSheet("Books");
+            Sheet sheet = workbook.createSheet("sheet0");
 
             // 创建表头
             Row headerRow = sheet.createRow(0);
@@ -110,14 +114,48 @@ public class ExcelController {
         return books;
     }
 
-    @GetMapping("/template")
+    @RequestMapping(value = "/import2", method = RequestMethod.POST)
+    public List<Book> importBooksFromExcel2(@RequestPart MultipartFile file) {
+        List<Book> books = new ArrayList<>();
+
+        try (InputStream is = file.getInputStream()) {
+            Workbook workbook = new XSSFWorkbook(is);
+            Iterator<Sheet> sheetIterator = workbook.iterator();
+            String fileExtension = StringUtils.getFilenameExtension(file.getOriginalFilename());
+            if (!ObjectUtils.isEmpty(fileExtension) && !fileExtension.endsWith("xlsx") && !fileExtension.endsWith("xls")) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件格式不正确，请上传xlsx或xls格式文件");
+            }
+            while (sheetIterator.hasNext()) {
+                Sheet sheet = sheetIterator.next();
+                Iterator<Row> rowIterator = sheet.rowIterator();
+                while (rowIterator.hasNext()) {
+                    Row row = rowIterator.next();
+                    // 跳过表头读取
+                    if (row.getRowNum() > 0) {
+                        Book book = new Book();
+                        book.setId((long) row.getCell(0).getNumericCellValue());
+                        book.setBookName(row.getCell(1).getStringCellValue());
+                        book.setAuthor(row.getCell(2).getStringCellValue());
+                        books.add(book);
+                    }
+                }
+            }
+            workbook.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Imported books: " + books);
+        return books;
+    }
+
+    @RequestMapping(value = "/template", method = RequestMethod.POST)
     public void exportTemplateToExcel(HttpServletResponse response) {
         // 创建一个新的Excel工作簿
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("sheet");
+        Sheet sheet = workbook.createSheet("sheet0");
         List<String> titleList = Arrays.asList("ID", "Book Name", "Author", "Create Time", "Update Time", "Is Delete");
 
-        writeCell(sheet, 0, titleList);
+        ExcelUtil.writeData(sheet,  titleList,0,new ArrayList<>());
 
         // 设置响应头信息
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -132,33 +170,8 @@ public class ExcelController {
         }
     }
 
-    /**
-     * 写入标题
-     *
-     * @param sheet
-     * @param rowNum    行号默认0开始
-     * @param cellValue
-     */
-    private void writeCell(Sheet sheet, int rowNum, List<String> cellValue) {
-        Row titleRow = sheet.createRow(rowNum);
-        for (int i = 0; i < cellValue.size(); i++) {
-            titleRow.createCell(i).setCellValue(cellValue.get(i));
-        }
-    }
-
-    /**
-     * 获取单元格中的字符串值
-     *
-     * @param cell
-     * @return
-     */
-    public static String getStringCellValue(Cell cell) {
-        cell.setCellType(CellType.STRING);
-        return cell.getStringCellValue().trim();
-    }
-
     // 这里假设一个简单的数据生成方法
-    private List<Book> generateDummyBooks() {
+    public List<Book> generateDummyBooks() {
         List<Book> books = new ArrayList<>();
         books.add(new Book().setId(1L)
                 .setBookName("Book A")
