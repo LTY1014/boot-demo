@@ -38,7 +38,7 @@ import java.util.List;
 @RequestMapping("/excel")
 public class ExcelController {
 
-    @ApiOperation(value = "导出到Excel", produces = "application/octet-stream")
+    @ApiOperation(value = "导出到Excel(POI实现)", produces = "application/octet-stream")
     @PostMapping("/export")
     public void exportBooksToExcel(HttpServletResponse response) {
         // 假设这里是生成的书籍数据
@@ -85,6 +85,7 @@ public class ExcelController {
         }
     }
 
+    @ApiOperation(value = "导入到Excel(POI实现)", produces = "application/octet-stream")
     @PostMapping("/import")
     public List<Book> importBooksFromExcel(@RequestPart MultipartFile file) {
         List<Book> books = new ArrayList<>();
@@ -114,6 +115,7 @@ public class ExcelController {
         return books;
     }
 
+    @ApiOperation(value = "导出到Excel(POI实现2)", produces = "application/octet-stream")
     @RequestMapping(value = "/import2", method = RequestMethod.POST)
     public List<Book> importBooksFromExcel2(@RequestPart MultipartFile file) {
         List<Book> books = new ArrayList<>();

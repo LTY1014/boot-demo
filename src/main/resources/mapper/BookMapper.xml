@@ -17,4 +17,24 @@
         id,bookName,author,
         createTime,updateTime,isDelete
     </sql>
+
+    <select id="selectBookList" resultType="com.lty.model.entity.Book">
+        select id, bookName, author, createTime, updateTime, isDelete
+        from book t
+        <where>
+            t.isDelete=0
+            <if test="dto.keyword!=null and dto.keyword!=''">
+                and (t.bookName like concat('%',#{dto.bookName},'%') or t.author like concat('%',#{dto.author},'%'))
+            </if>
+            <if test="dto.bookName!=null and dto.bookName!=''">
+                and t.bookName like concat('%',#{dto.bookName},'%')
+            </if>
+            <if test="dto.authors != null and dto.authors.size() > 0">
+                and t.author in
+                <foreach collection="dto.authors" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
 </mapper>

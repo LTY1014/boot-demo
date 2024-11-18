@@ -4,6 +4,8 @@ import com.lty.common.PageRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 /**
  * @author lty
  */
@@ -14,4 +16,8 @@ public class BookQueryRequest extends PageRequest {
     private String bookName;
 
     private String author;
+
+    private String keyword;
+
+    private List<String> authors;
 }
