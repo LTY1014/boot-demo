@@ -2,9 +2,6 @@ server:
   port: 8088
   servlet:
     context-path: /api
-    # session超时时间30天
-    session:
-      timeout: "P30D"
 
 spring:
   datasource:
@@ -14,6 +11,9 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   application:
     name: boot-demo
+  session:
+    # 生效时间为一天
+    timeout: 86400
   # 解决swagger和springBoot高版本冲突问题
   mvc:
     pathmatch:
