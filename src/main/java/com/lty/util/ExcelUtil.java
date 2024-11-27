@@ -12,7 +12,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import java.util.List;
 
 /**
- * excel工具类
+ * POI excel工具类
  */
 public class ExcelUtil {
 

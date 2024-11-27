@@ -5,6 +5,12 @@ import com.lty.common.ErrorCode;
 import com.lty.exception.BusinessException;
 import org.openjdk.jol.vm.VM;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 /**
  * @author lty
  */
@@ -88,5 +94,23 @@ public class BaseUtil {
             }
         }
         return (str.charAt(0) + sb.toString()).toLowerCase();
+    }
+
+    // 使用序列化和反序列化实现深拷贝(注意对象要实现序列化才能实现)
+    public static <T> T deepCopy(T object) {
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+             ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
+
+            objectOutputStream.writeObject(object);
+            try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+                 ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream)) {
+
+                return (T) objectInputStream.readObject();
+            }
+
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
