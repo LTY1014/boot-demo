@@ -1,21 +1,29 @@
 package com.lty.util;
 
+import com.lty.constant.BaseConstant;
+import lombok.extern.slf4j.Slf4j;
+import org.lionsoul.ip2region.xdb.Searcher;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 获取IP信息
+ *
  * @author lty
  */
+@Slf4j
 @Component
 public class IpInfoUtil {
     static final String UNKNOWN = "unknown";
 
     /**
      * 获取客户端IP地址
+     *
      * @param request
      * @return
      */
@@ -53,5 +61,38 @@ public class IpInfoUtil {
             ip = "127.0.0.1";
         }
         return ip;
+    }
+
+    /**
+     * 获取客户端IP地址
+     * @param ip
+     * @return
+     */
+    public static String getClient(String ip) {
+        String dbPath = BaseConstant.PROJECT_ROOT_DIRECTORY + "/src/main/resources/static/ip2region.xdb";
+        Searcher searcher = null;
+        try {
+            searcher = Searcher.newWithFileOnly(dbPath);
+        } catch (IOException e) {
+            log.info("failed to create searcher with `%s`: %s", dbPath, e);
+        }
+        // 2、查询
+        try {
+            long sTime = System.nanoTime();
+            String region = searcher.search(ip);
+            long cost = TimeUnit.NANOSECONDS.toMicros((long) (System.nanoTime() - sTime));
+            log.info("region: {}, ioCount: {}, took: {} μs", region, searcher.getIOCount(), cost);
+            String[] split = region.split("\\|");
+            return !"0".equals(split[2]) ? split[2] : split[0];
+        } catch (Exception e) {
+            System.out.printf("failed to search(%s): %s\n", ip, e);
+        }
+        // 3、关闭资源
+        try {
+            searcher.close();
+        } catch (IOException e) {
+            log.info("failed to close: %s", e);
+        }
+        return "";
     }
 }

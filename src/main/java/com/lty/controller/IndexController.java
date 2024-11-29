@@ -84,4 +84,10 @@ public class IndexController {
     public BaseResponse<String> getIp(HttpServletRequest request) {
         return ResultUtils.success(IpInfoUtil.getIpAddress(request));
     }
+
+    @ApiOperation(value = "获取ClientIP")
+    @GetMapping("/getClientIp")
+    public BaseResponse<String> getClientIp(String ip) {
+        return ResultUtils.success(IpInfoUtil.getClient(ip));
+    }
 }
