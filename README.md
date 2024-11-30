@@ -1,9 +1,9 @@
 ## boot-demo
 
-记录所有SpringBoot的demo用例
+
 
 <p align=center>
-    <a href="http://gitee.com/liang-tian-yu">Spring Boot脚手架</a>
+    <a href="http://gitee.com/liang-tian-yu">Spring Boot案例</a>
 </p>
 <p align="center">
 <a target="_blank" href="http://gitee.com/liang-tian-yu">
@@ -16,6 +16,9 @@
 
 
 
+记录所有SpringBoot的demo用例
+
+[TOC]
 
 
 
@@ -68,13 +71,9 @@ spring:
 
 
 
-## beetl
-
-代码生成
 
 
-
-### MybaisPlus
+## MybaisPlus
 
 自定义生成主键策略
 
