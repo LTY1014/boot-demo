@@ -1,9 +1,15 @@
 package com.lty.controller;
 
+import com.alibaba.excel.EasyExcel;
 import com.lty.common.ErrorCode;
 import com.lty.exception.BusinessException;
+import com.lty.model.dto.ExcelDemo;
+import com.lty.model.dto.Person;
 import com.lty.model.entity.Book;
 import com.lty.util.ExcelUtil;
+import com.lty.util.ServletUtil;
+import com.lty.util.easyexcel.ExcelDataValidator;
+import com.lty.util.easyexcel.ExcelListener;
 import io.swagger.annotations.ApiOperation;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -27,7 +33,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -42,7 +47,7 @@ public class ExcelController {
     @PostMapping("/export")
     public void exportBooksToExcel(HttpServletResponse response) {
         // 假设这里是生成的书籍数据
-        List<Book> books = generateDummyBooks();
+        List<Person> personList = Person.getPersonList();
         // 写入输出流
         try {
 
@@ -52,23 +57,19 @@ public class ExcelController {
 
             // 创建表头
             Row headerRow = sheet.createRow(0);
-            headerRow.createCell(0).setCellValue("ID");
-            headerRow.createCell(1).setCellValue("Book Name");
-            headerRow.createCell(2).setCellValue("Author");
-            headerRow.createCell(3).setCellValue("Create Time");
-            headerRow.createCell(4).setCellValue("Update Time");
-            headerRow.createCell(5).setCellValue("Is Delete");
+            headerRow.createCell(0).setCellValue("姓名");
+            headerRow.createCell(1).setCellValue("年龄");
+            headerRow.createCell(2).setCellValue("金额");
+            headerRow.createCell(3).setCellValue("生日");
 
             // 写入数据
             int rowNum = 1;
-            for (Book book : books) {
+            for (Person person : personList) {
                 Row row = sheet.createRow(rowNum++);
-                row.createCell(0).setCellValue(book.getId());
-                row.createCell(1).setCellValue(book.getBookName());
-                row.createCell(2).setCellValue(book.getAuthor());
-                row.createCell(3).setCellValue(book.getCreateTime().toString());
-                row.createCell(4).setCellValue(book.getUpdateTime().toString());
-                row.createCell(5).setCellValue(book.getIsDelete());
+                row.createCell(0).setCellValue(person.getName());
+                row.createCell(1).setCellValue(person.getAge());
+                row.createCell(2).setCellValue(person.getMoney().toString());
+                row.createCell(3).setCellValue(person.getBirthday().toString());
             }
 
             // 设置HTTP响应头
@@ -157,14 +158,15 @@ public class ExcelController {
         Sheet sheet = workbook.createSheet("sheet0");
         List<String> titleList = Arrays.asList("ID", "Book Name", "Author", "Create Time", "Update Time", "Is Delete");
 
-        ExcelUtil.writeData(sheet,  titleList,0,new ArrayList<>());
-
-        // 设置响应头信息
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=template.xlsx");
+        ExcelUtil.writeData(sheet, titleList, 0, new ArrayList<>());
 
         // 写入输出流
         try {
+            String fileName = "template.xlsx";
+            fileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20");
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+
             workbook.write(response.getOutputStream());
             workbook.close();
         } catch (IOException e) {
@@ -172,21 +174,47 @@ public class ExcelController {
         }
     }
 
-    // 这里假设一个简单的数据生成方法
-    public List<Book> generateDummyBooks() {
-        List<Book> books = new ArrayList<>();
-        books.add(new Book().setId(1L)
-                .setBookName("Book A")
-                .setAuthor("Author A")
-                .setCreateTime(new Date())
-                .setUpdateTime(new Date())
-                .setIsDelete(0));
-        books.add(new Book().setId(2L)
-                .setBookName("Book B")
-                .setAuthor("Author B")
-                .setCreateTime(new Date())
-                .setUpdateTime(new Date())
-                .setIsDelete(0));
-        return books;
+    @ApiOperation(value = "导出Excel(EasyExcel实现)", produces = "application/octet-stream")
+    @RequestMapping(value = "/easyexcel/export", method = RequestMethod.POST)
+    public void easyexcelExport() {
+        HttpServletResponse response = ServletUtil.getResponse();
+        // 写入输出流
+        try {
+            // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setCharacterEncoding("utf-8");
+            // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
+            String fileName = "template.xlsx";
+            fileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20");
+            response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName);
+            EasyExcel.write(response.getOutputStream(), ExcelDemo.class)
+                    .sheet("sheet1")
+                    .doWrite(getExcelDemoList());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @ApiOperation(value = "导入Excel(EasyExcel实现)", produces = "application/octet-stream")
+    @RequestMapping(value = "/easyexcel/import", method = RequestMethod.POST)
+    public void easyexcelImport(@RequestPart MultipartFile file) {
+        // 写入输出流
+        ExcelListener excelListener = new ExcelListener(new ExcelDataValidator());
+        try {
+            EasyExcel.read(file.getInputStream(), ExcelDemo.class, excelListener).sheet(0).doRead();
+            List list = excelListener.getData();
+            System.out.println("数据解析共:" + list.size());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 模拟ExcelDemo数据
+    public List<ExcelDemo> getExcelDemoList() {
+        List<ExcelDemo> excelDemoList = new ArrayList<>();
+        excelDemoList.add(new ExcelDemo("1", "张三", "001"));
+        excelDemoList.add(new ExcelDemo("2", "李四", "002"));
+        excelDemoList.add(new ExcelDemo("3", "王五", "003"));
+        return excelDemoList;
     }
 }

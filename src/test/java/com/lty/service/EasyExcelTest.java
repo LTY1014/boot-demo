@@ -1,13 +1,13 @@
 package com.lty.service;
 
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.support.ExcelTypeEnum;
 import com.lty.model.dto.ExcelDemo;
 import com.lty.util.BaseUtil;
+import com.lty.util.easyexcel.ExcelDataValidator;
+import com.lty.util.easyexcel.ExcelListener;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -17,8 +17,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
+//@RunWith(SpringRunner.class)
+//@SpringBootTest
 public class EasyExcelTest {
 
     @Test
@@ -35,9 +35,9 @@ public class EasyExcelTest {
      */
     @Test
     public void insertSqlByExcel() {
-        String filename = "D:\\Downloads\\template.xlsx";
+        String filename = "D:\\Desktop\\demo_book.xlsx";
         List<ExcelDemo> list =
-                EasyExcel.read(filename).head(ExcelDemo.class).sheet().doReadSync();
+                EasyExcel.read(filename).excelType(ExcelTypeEnum.XLSX).head(ExcelDemo.class).sheet("Result 1").doReadSync();
 
         Field[] fields = FieldUtils.getAllFields(ExcelDemo.class);
 
@@ -83,5 +83,14 @@ public class EasyExcelTest {
                     .append(");");
             System.out.println(insertSql.toString());
         }
+    }
+
+        // 测试ExcelListener
+    @Test
+    public void ExcelListener() {
+        String filename = "D:\\Desktop\\customer_product.xlsx";
+        ExcelListener excelListener = new ExcelListener(new ExcelDataValidator());
+        EasyExcel.read(filename, ExcelDemo.class, excelListener).sheet("template").doRead();
+        List list = excelListener.getData();
     }
 }
