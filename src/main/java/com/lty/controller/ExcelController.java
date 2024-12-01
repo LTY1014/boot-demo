@@ -199,11 +199,9 @@ public class ExcelController {
     @RequestMapping(value = "/easyexcel/import", method = RequestMethod.POST)
     public void easyexcelImport(@RequestPart MultipartFile file) {
         // 写入输出流
-        ExcelListener excelListener = new ExcelListener(new ExcelDataValidator());
+        ExcelListener excelListener = new ExcelListener(new ExcelDataValidator(), list -> System.out.println("模拟存储数据:" + list));
         try {
             EasyExcel.read(file.getInputStream(), ExcelDemo.class, excelListener).sheet(0).doRead();
-            List list = excelListener.getData();
-            System.out.println("数据解析共:" + list.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
