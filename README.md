@@ -16,7 +16,7 @@
 
 
 
-记录所有SpringBoot的demo用例
+记录SpringBoot的demo用例
 
 [TOC]
 
@@ -115,26 +115,3 @@ public class MybatisPlusConfig {
 @TableId(type = IdType.ASSIGN_ID, value = "id")
 private String id;
 ```
-
-
-
-
-
-## 系统参数
-
-
-
-单元测试
-
-```
-    @Test
-    public void test() {
-        //SystemParameter parameter = systemParameterService.getById(1L);
-        //Boolean convert = ConversionUtil.convert(parameter.getValue(), Boolean.class);
-        //System.out.println(convert);
-
-        Boolean test = systemParameterService.getValue("test",Boolean.class);
-        System.out.println(test);
-    }
-```
-

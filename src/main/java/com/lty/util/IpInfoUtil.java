@@ -1,12 +1,13 @@
 package com.lty.util;
 
-import com.lty.constant.BaseConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.lionsoul.ip2region.xdb.Searcher;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
@@ -65,16 +66,20 @@ public class IpInfoUtil {
 
     /**
      * 获取客户端IP地址
+     *
      * @param ip
      * @return
      */
     public static String getClient(String ip) {
-        String dbPath = BaseConstant.PROJECT_ROOT_DIRECTORY + "/src/main/resources/static/ip2region.xdb";
+        // 1、使用 ClassPathResource 获取资源文件
+        ClassPathResource resource = new ClassPathResource("static/ip2region.xdb");
         Searcher searcher = null;
-        try {
-            searcher = Searcher.newWithFileOnly(dbPath);
+        try (InputStream inputStream = resource.getInputStream()) {
+            // 2、根据 InputStream 创建 Searcher
+            byte[] dbBytes = inputStream.readAllBytes();
+            searcher = Searcher.newWithBuffer(dbBytes);
         } catch (IOException e) {
-            log.info("failed to create searcher with `%s`: %s", dbPath, e);
+            log.info("failed to create searcher: %s", e);
         }
         // 2、查询
         try {
