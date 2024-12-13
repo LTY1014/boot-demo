@@ -2,6 +2,8 @@ package com.lty.service;
 
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.system.SystemUtil;
 import com.lty.model.dto.Person;
@@ -33,9 +35,19 @@ public class HuToolTest {
     @Test
     public void testJSON() {
         List<Person> personList = Person.getPersonList();
-        String jsonStr = JSONUtil.toJsonStr(personList);
-        List<Person> personList1 = JSONUtil.toList(jsonStr, Person.class);
-        System.out.println(personList1);
+        String json = JSONUtil.toJsonStr(personList);
+        System.out.println(json);
+
+        JSONArray jsonArray = JSONUtil.parseArray(json);
+        System.out.println(jsonArray);
+
+        for (Object obj : jsonArray) {
+            JSONObject jsonObject = JSONUtil.parseObj(obj);
+            System.out.println(jsonObject.getStr("name"));
+            if (jsonObject.containsKey("age")) {
+                System.out.println(jsonObject.getStr("age"));
+            }
+        }
     }
 
     @Test
