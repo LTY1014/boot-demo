@@ -10,6 +10,7 @@ import com.lty.util.ExcelUtil;
 import com.lty.util.ServletUtil;
 import com.lty.util.easyexcel.ExcelDataValidator;
 import com.lty.util.easyexcel.ExcelListener;
+import com.lty.util.easyexcel.ExcelWriteUtil;
 import io.swagger.annotations.ApiOperation;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -205,6 +206,12 @@ public class ExcelController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @ApiOperation(value = "导出Excel(EasyExcel工具实现)", produces = "application/octet-stream")
+    @RequestMapping(value = "/easyexcel/util/export", method = RequestMethod.POST)
+    public void easyexcelExportByUtil() throws IOException {
+        ExcelWriteUtil.exportExcel(getExcelDemoList());
     }
 
     // 模拟ExcelDemo数据
