@@ -3,7 +3,7 @@ package com.lty.service;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.lty.model.dto.ExcelDemo;
-import com.lty.util.BaseUtil;
+import com.lty.util.GrammarUtil;
 import com.lty.util.easyexcel.ExcelDataValidator;
 import com.lty.util.easyexcel.ExcelListener;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -62,7 +62,7 @@ public class EasyExcelTest {
             for (String fieldName : fieldNames) {
                 try {
                     // 使用反射找到对应的 getter 方法
-                    Method getter = ExcelDemo.class.getMethod("get" + BaseUtil.isFirstUpper(fieldName, true));
+                    Method getter = ExcelDemo.class.getMethod("get" + GrammarUtil.isFirstUpper(fieldName, true));
                     // 调用 getter 方法获取值
                     Object value = getter.invoke(demo);
                     // 将值添加到字段值列表中

@@ -33,7 +33,7 @@ public class JsqlparserTest {
 
         // 构建实体类
         StringBuilder entityClass = new StringBuilder();
-        entityClass.append("public class ").append(BaseUtil.isFirstUpper(tableName, true)).append(" {\n\n");
+        entityClass.append("public class ").append(GrammarUtil.isFirstUpper(tableName, true)).append(" {\n\n");
 
         for (ColumnDefinition column : columnDefinitions) {
             String columnName = column.getColumnName();
@@ -42,7 +42,7 @@ public class JsqlparserTest {
             String javaType = GrammarUtil.mapSqlTypeToJavaType(dataType);
 
             // 添加字段
-            entityClass.append("    private ").append(javaType).append(" ").append(BaseUtil.isFirstUpper(columnName, false)).append(";\n");
+            entityClass.append("    private ").append(javaType).append(" ").append(GrammarUtil.isFirstUpper(columnName, false)).append(";\n");
         }
 
         entityClass.append("\n}");
