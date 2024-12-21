@@ -1,7 +1,12 @@
 package com.lty.service.java;
 
+import com.lty.common.BaseResponse;
+import com.lty.model.dto.book.BookQueryRequest;
 import com.lty.model.dto.user.UserLoginRequest;
+import com.lty.model.entity.Book;
 import com.lty.util.GsonUtil;
+import com.lty.util.HttpClientUtil;
+import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -13,6 +18,9 @@ import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * HttpClient 测试类
@@ -79,4 +87,19 @@ public class HttpTest {
         }
     }
 
+    @Test
+    public void testHttpClientUtilByGet() throws IOException {
+        BaseResponse response = HttpClientUtil.getRequest("http://139.224.186.190:8088/api/book/list?current=1&pageSize=10");
+        List<Book> books = GsonUtil.jsonToList(GsonUtil.beanToJson(response.getData()), Book.class);
+        System.out.println(books);
+    }
+
+    @Test
+    public void testHttpClientUtilByPost() throws IOException {
+        UserLoginRequest userLoginRequest = new UserLoginRequest();
+        userLoginRequest.setUserAccount("test2");
+        userLoginRequest.setUserPassword("123456");
+        BaseResponse response = HttpClientUtil.postRequest("http://139.224.186.190:8088/api/user/login", userLoginRequest);
+        System.out.println(response);
+    }
 }
