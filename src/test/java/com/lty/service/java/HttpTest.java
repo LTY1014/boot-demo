@@ -101,5 +101,7 @@ public class HttpTest {
         userLoginRequest.setUserPassword("123456");
         BaseResponse response = HttpClientUtil.postRequest("http://139.224.186.190:8088/api/user/login", userLoginRequest);
         System.out.println(response);
+        BaseResponse response2 = HttpClientUtil.getRequest("http://139.224.186.190:8088/api/user/current");
+        System.out.println(response2);
     }
 }
