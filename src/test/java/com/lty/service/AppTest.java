@@ -31,7 +31,6 @@ public class AppTest {
     public void bookTest() {
         BookQueryRequest dto = new BookQueryRequest();
         //dto.setBookName("11");
-        dto.setAuthors(new ArrayList<>(Arrays.asList("author10", "author11")));
         List<Book> books = bookMapper.selectBookList(dto);
         System.out.println(books);
     }

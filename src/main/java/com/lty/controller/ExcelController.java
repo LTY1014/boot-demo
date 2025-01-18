@@ -104,7 +104,6 @@ public class ExcelController {
                     Book book = new Book();
                     book.setId((long) row.getCell(0).getNumericCellValue());
                     book.setBookName(row.getCell(1).getStringCellValue());
-                    book.setAuthor(row.getCell(2).getStringCellValue());
                     books.add(book);
                 }
             }
@@ -139,7 +138,6 @@ public class ExcelController {
                         Book book = new Book();
                         book.setId((long) row.getCell(0).getNumericCellValue());
                         book.setBookName(row.getCell(1).getStringCellValue());
-                        book.setAuthor(row.getCell(2).getStringCellValue());
                         books.add(book);
                     }
                 }

@@ -4,7 +4,7 @@ import com.lty.common.PageRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 /**
  * @author lty
@@ -15,9 +15,13 @@ public class BookQueryRequest extends PageRequest {
 
     private String bookName;
 
-    private String author;
+    /**
+     * 类型
+     */
+    private String type;
 
-    private String keyword;
-
-    private List<String> authors;
+    /**
+     * 价格
+     */
+    private BigDecimal price;
 }
