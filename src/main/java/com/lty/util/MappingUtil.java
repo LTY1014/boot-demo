@@ -55,6 +55,19 @@ public class MappingUtil {
         );
     }
 
+    /**
+     * 将多个字段拼接成字符串(用于业务键)
+     * @param fields
+     * @param <T>
+     * @return
+     */
+    @SafeVarargs
+    public static <T> String joinFields(T... fields) {
+        return Arrays.stream(fields)
+                .map(field -> field instanceof String ? (String) field : String.valueOf(field))
+                .collect(Collectors.joining("-"));
+    }
+
     // 防止实例化
     private MappingUtil() {
     }
