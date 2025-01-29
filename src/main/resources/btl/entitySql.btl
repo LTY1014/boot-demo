@@ -1,0 +1,38 @@
+package {entity.entityPackage};
+
+import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+import lombok.experimental.Accessors;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+/**
+ * ${entity.description}
+ * @author ${entity.author}
+ */
+@Data
+@Accessors(chain = true)
+@TableName("${entity.tableName}")
+public class ${entity.className} implements Serializable {
+
+    /**
+     * id
+     */
+    @TableId(type = IdType.AUTO)
+    private Long id;
+
+    <%
+    for(item in fields){
+    %>
+    /**
+     * ${item.comment}
+     */
+     private ${item.javaType} ${item.field};
+
+    <% } %>
+    @TableField(exist = false)
+    private static final long serialVersionUID = 1L;
+}

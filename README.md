@@ -71,6 +71,8 @@ spring:
 
 
 
+配置详见`Knife4jConfig`
+
 
 
 ## MybaisPlus
