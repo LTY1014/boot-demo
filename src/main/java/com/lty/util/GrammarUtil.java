@@ -62,6 +62,31 @@ public class GrammarUtil {
         return (str.charAt(0) + sb.toString()).toLowerCase();
     }
 
+    /**
+     * 下划线转驼峰法
+     */
+    public static String underline2Camel(String str) {
+        if (StrUtil.isBlank(str)) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        boolean nextUpperCase = false;
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if (c == '_') {
+                nextUpperCase = true;
+            } else {
+                if (nextUpperCase) {
+                    sb.append(Character.toUpperCase(c));
+                    nextUpperCase = false;
+                } else {
+                    sb.append(Character.toLowerCase(c));
+                }
+            }
+        }
+        return sb.toString();
+    }
+
     public static String mapSqlTypeToJavaType(String sqlType) {
         // 简单映射 SQL 数据类型到 Java 类型
         switch (sqlType.toLowerCase()) {

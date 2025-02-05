@@ -1,7 +1,9 @@
 package com.lty.service;
 
+import com.lty.code.bean.Field;
 import com.lty.util.BaseUtil;
 import com.lty.util.GrammarUtil;
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.MultiExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -124,5 +126,68 @@ public class JsqlparserTest {
         }
 
         return null;
+    }
+
+    //  ===============================================
+    public String templateStr = """
+            create table project
+            (
+                id          bigint auto_increment comment 'id'
+                    primary key,
+                code        varchar(64)                             not null comment '标识',
+                name        varchar(256)                            null comment '名称',
+                description varchar(256)                            null comment '描述',
+                sortable    decimal(5, 2) default 100.00            null comment '排序',
+                status      int           default 1                 null comment '状态:0-禁用,1-启用',
+                createTime  datetime      default CURRENT_TIMESTAMP null comment '创建时间',
+                updateTime  datetime      default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
+                isDelete    tinyint       default 0                 not null comment '是否删除'
+            )
+                comment '项目表' charset = utf8mb4;
+                        """;
+
+    // 测试根据SQL语句得到字段信息
+    @Test
+    public void testField() throws JSQLParserException {
+        // 根据templateStr得到List<FieldInfo> fieldInfoList 其中有（字段名，字段类型，是否为空，是否主键，是否自增）
+        List<Field> fieldInfoList = parseSqlFields(templateStr);
+        System.out.println(fieldInfoList);
+    }
+
+
+    private static List<Field> parseSqlFields(String sql) throws JSQLParserException {
+        List<Field> fieldInfos = new ArrayList<>();
+        CreateTable createTable = (CreateTable) CCJSqlParserUtil.parse(sql);
+        List<ColumnDefinition> columnDefinitions = createTable.getColumnDefinitions();
+
+        for (ColumnDefinition columnDefinition : columnDefinitions) {
+            Field fieldInfo = new Field();
+            String columnName = columnDefinition.getColumnName();
+            String dataType = columnDefinition.getColDataType().getDataType();
+            List<String> columnSpecs = columnDefinition.getColumnSpecs();
+            String columnComment = "";
+            // 提取注释内容
+            if (columnSpecs != null) {
+                for (int i = 0; i < columnSpecs.size(); i++) {
+                    String spec = columnSpecs.get(i);
+                    if ("COMMENT".equalsIgnoreCase(spec)) {
+                        if (i + 1 < columnSpecs.size()) {
+                            String commentValue = columnSpecs.get(i + 1);
+                            // 去除首尾的单引号
+                            columnComment = commentValue.replaceAll("^'|'$", "");
+                            break;
+                        }
+                    }
+                }
+            }
+            String javaType = GrammarUtil.mapSqlTypeToJavaType(dataType);
+
+            fieldInfo.setField(columnName);
+            fieldInfo.setJavaType(javaType);
+            fieldInfo.setComment(columnComment);
+            fieldInfos.add(fieldInfo);
+        }
+
+        return fieldInfos;
     }
 }
