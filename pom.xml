@@ -177,6 +177,11 @@
             <artifactId>jsqlparser</artifactId>
             <version>4.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.openapi4j</groupId>
+            <artifactId>openapi-parser</artifactId>
+            <version>1.0.7</version>
+        </dependency>
     </dependencies>
 
     <!--多环境打包-->
