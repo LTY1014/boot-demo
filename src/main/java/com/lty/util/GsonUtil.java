@@ -1,7 +1,18 @@
 package com.lty.util;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,9 +27,10 @@ public class GsonUtil {
     // 判断gson对象是否存在了,不存在则创建对象
     static {
         if (gson == null) {
-            // gson = new Gson();
-            // 当使用GsonBuilder方式时属性为空的时候输出来的json字符串是有键值key的,显示形式是"key":null，而直接new出来的就没有"key":null的
-            gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss")
+            // 使用GsonBuilder方式时属性为空的时候输出来的json字符串是有键值key的,显示形式是"key":null，而直接new出来的就没有"key":null的
+            gson = new GsonBuilder()
+                    .setDateFormat("yyyy-MM-dd HH:mm:ss")
+                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                     .create();
         }
     }
@@ -82,4 +94,28 @@ public class GsonUtil {
         return jsons;
     }
 
+    /**
+     * LocalDateTime类型适配器
+     */
+    private static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
+        private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        @Override
+        public void write(JsonWriter out, LocalDateTime value) throws IOException {
+            if (value == null) {
+                out.nullValue();
+            } else {
+                out.value(value.format(formatter));
+            }
+        }
+
+        @Override
+        public LocalDateTime read(JsonReader in) throws IOException {
+            if (in.peek() == JsonToken.NULL) {
+                in.nextNull();
+                return null;
+            } else {
+                return LocalDateTime.parse(in.nextString(), formatter);
+            }
+        }
+    }
 }
