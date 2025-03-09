@@ -31,7 +31,10 @@ public class MappingUtil {
         List<Function<? super T, K>> classifierList = Arrays.asList(classifiers);
         return Collectors.toMap(
                 t -> classifierList.stream()
-                        .map(classifier -> String.valueOf(classifier.apply(t)))
+                        .map(classifier -> {
+                            K result = classifier.apply(t);
+                            return result != null ? String.valueOf(result) : "";
+                        })
                         .collect(Collectors.joining("-")),
                 Function.identity(),
                 // 保证键冲突时，保留旧值
