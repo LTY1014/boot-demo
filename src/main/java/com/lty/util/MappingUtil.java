@@ -5,8 +5,11 @@ import com.lty.model.dto.Person;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -69,6 +72,33 @@ public class MappingUtil {
         return Arrays.stream(fields)
                 .map(field -> field instanceof String ? (String) field : String.valueOf(field))
                 .collect(Collectors.joining("-"));
+    }
+
+    /**
+     * 对比两个集合的差异，返回源集合中存在而目标集合中不存在的元素
+     */
+    public static <T, K> List<T> differenceBy(
+            Collection<T> source,
+            Collection<T> target,
+            Function<? super T, K> keyExtractor) {
+        // 检查输入参数是否为空
+        if (source == null || target == null || keyExtractor == null) {
+            throw new IllegalArgumentException("输入参数不能为 null");
+        }
+
+        // 提取目标集合的键集合
+        Set<K> targetKeys = target.stream()
+                .map(keyExtractor)
+                .filter(Objects::nonNull) // 忽略键为 null 的情况
+                .collect(Collectors.toSet());
+
+        // 从源集合中过滤掉键在目标集合中的元素
+        return source.stream()
+                .filter(item -> {
+                    K key = keyExtractor.apply(item);
+                    return key == null || !targetKeys.contains(key);
+                })
+                .collect(Collectors.toList());
     }
 
     // 防止实例化
