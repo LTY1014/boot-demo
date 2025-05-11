@@ -4,36 +4,26 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lty.mapper.BookMapper">
 
-    <resultMap id="BaseResultMap" type="com.lty.model.entity.Book">
-            <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="bookName" column="bookName" jdbcType="VARCHAR"/>
-            <result property="author" column="author" jdbcType="VARCHAR"/>
-            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
-            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
-            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
-    </resultMap>
-
-    <sql id="Base_Column_List">
-        id,bookName,author,
-        createTime,updateTime,isDelete
-    </sql>
-
     <select id="selectBookList" resultType="com.lty.model.entity.Book">
-        select id, bookName, author, createTime, updateTime, isDelete
+        <bind name="likePattern" value="'%' + dto.bookName + '%'"/>
+        select id, bookName, type, price, createTime, updateTime, isDelete
         from book t
         <where>
             t.isDelete=0
             <if test="dto.keyword!=null and dto.keyword!=''">
-                and (t.bookName like concat('%',#{dto.bookName},'%') or t.author like concat('%',#{dto.author},'%'))
+                and (t.bookName like concat('%',#{dto.bookName},'%') or t.type like concat('%',#{dto.type},'%'))
             </if>
             <if test="dto.bookName!=null and dto.bookName!=''">
                 and t.bookName like concat('%',#{dto.bookName},'%')
             </if>
-            <if test="dto.authors != null and dto.authors.size() > 0">
-                and t.author in
-                <foreach collection="dto.authors" item="item" open="(" separator="," close=")">
+            <if test="dto.typeList != null and dto.typeList.size() > 0">
+                and t.type in
+                <foreach collection="dto.typeList" item="item" open="(" separator="," close=")">
                     #{item}
                 </foreach>
+            </if>
+            <if test="dto.bookName != null and dto.bookName != ''">
+                and t.bookName like #{likePattern}
             </if>
         </where>
     </select>

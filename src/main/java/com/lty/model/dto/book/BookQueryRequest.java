@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @author lty
@@ -19,6 +20,10 @@ public class BookQueryRequest extends PageRequest {
      * 类型
      */
     private String type;
+
+    private List<String> typeList;
+
+    private String keyword;
 
     /**
      * 价格
