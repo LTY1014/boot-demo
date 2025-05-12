@@ -90,4 +90,23 @@ public class HuToolTest {
             }
         }
     }
+
+    @Test
+    public void testHttpRequest() {
+        while (true){
+            try {
+                HttpRequest request = HttpRequest.post("https://api.uomg.com/api/rand.qinghua")
+                        .form("format", "json")
+                        .timeout(5000);
+
+                HttpResponse response = request.execute();
+                if (response.isOk()) {
+                    System.out.println(response.body());
+                }
+                Thread.sleep(2000); // 每次请求间隔 3 秒
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
