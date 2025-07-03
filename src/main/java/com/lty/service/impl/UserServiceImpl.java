@@ -98,7 +98,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         // 3. 记录用户的登录态
         HttpServletRequest request = ServletUtil.getRequest();
-        request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
+        request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user.getId());
         return user;
     }
 
@@ -106,14 +106,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public User getLoginUser() {
         // 先判断是否已登录
         HttpServletRequest request = ServletUtil.getRequest();
-        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
-        if (currentUser == null || currentUser.getId() == null) {
-            return null;
-        }
-        // 从数据库查询（追求性能的话可以注释，直接走缓存）
-        long userId = currentUser.getId();
-        currentUser = this.getById(userId);
+        // 获取用户时再从数据库加载
+        Long userId = (Long) request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+        User currentUser = this.getById(userId);
         if (currentUser == null) {
             return null;
         }
@@ -122,11 +117,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public boolean isAdmin() {
-        // 仅管理员可查询
-        HttpServletRequest request = ServletUtil.getRequest();
-        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
-        User user = (User) userObj;
-        return user != null && UserConstant.ADMIN_ROLE.equals(user.getUserRole());
+        User loginUser = getLoginUser();
+        if (loginUser == null) {
+            return false;
+        }
+        return UserConstant.ADMIN_ROLE.equals(loginUser.getUserRole());
     }
 
     @Override
