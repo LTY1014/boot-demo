@@ -43,6 +43,21 @@ public class UserVO implements Serializable {
     private String userRole;
 
     /**
+     * 电话
+     */
+    private String phone;
+
+    /**
+     * 邮箱
+     */
+    private String email;
+
+    /**
+     * 状态 0 - 正常
+     */
+    private Integer userStatus;
+
+    /**
      * 创建时间
      */
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")

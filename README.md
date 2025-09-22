@@ -75,6 +75,20 @@ spring:
 
 
 
+application.yml
+
+```
+# 解决swagger和springBoot高版本冲突问题
+spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+```
+
+
+
+
+
 ## MybaisPlus
 
 自定义生成主键策略
