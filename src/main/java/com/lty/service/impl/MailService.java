@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -14,6 +13,7 @@ import javax.annotation.Resource;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.File;
+import java.util.List;
 
 /**
  * 邮件服务实现类
@@ -37,15 +37,20 @@ public class MailService {
      * @param subject 邮件主题
      * @param content 邮件内容
      */
-    public void sendSimpleMail(String[] to, String subject, String content) {
+    public Boolean sendSimpleMail(String[] to, String subject, String content) {
         log.info("发送文本邮件: 收件人={}, 主题={}, 内容={}", to, subject, content);
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(from);
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(content);
-        mailSender.send(message);
-        log.info("邮件发送成功！");
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(from);
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(content);
+            mailSender.send(message);
+        } catch (Exception e) {
+            log.error("邮件发送异常！", e);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -56,16 +61,21 @@ public class MailService {
      * @param content 邮件内容
      * @throws MessagingException 邮件发送异常
      */
-    public void sendHtmlMail(String[] to, String subject, String content) throws MessagingException {
+    public Boolean sendHtmlMail(String[] to, String subject, String content) {
         log.info("发送HTML邮件: 收件人={}, 主题={}, 内容={}", to, subject, content);
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message);
-        helper.setFrom(from);
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(content, true);
-        mailSender.send(message);
-        log.info("邮件发送成功！");
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message);
+            helper.setFrom(from);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(content, true);
+            mailSender.send(message);
+        } catch (Exception e) {
+            log.error("邮件发送异常！", e);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -74,22 +84,26 @@ public class MailService {
      * @param to      收件人
      * @param subject 邮件主题
      * @param content 邮件内容
-     * @param file    附件文件
      * @throws MessagingException 邮件发送异常
      */
-    public void sendAttachmentMail(String[] to, String subject, String content, File file) throws MessagingException {
+    public Boolean sendAttachmentMail(String[] to, String subject, String content, List<File> files) {
         log.info("发送附件邮件: 收件人={}, 主题={}, 内容={}", to, subject, content);
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        helper.setFrom(from);
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(content, true);
-        FileSystemResource fileSystemResource = new FileSystemResource(file);
-        String fileName = file.getName();
-        helper.addAttachment(fileName, fileSystemResource);
-        mailSender.send(message);
-        log.info("邮件发送成功！");
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom(from);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(content, true);
+            for (File file : files) {
+                helper.addAttachment(file.getName(), file);
+            }
+            mailSender.send(message);
+        } catch (Exception e) {
+            log.error("邮件发送异常！", e);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -102,19 +116,24 @@ public class MailService {
      * @param fileName        附件文件名
      * @throws MessagingException 邮件发送异常
      */
-    public void sendAttachmentMail(String[] to, String subject, String content,
-                                   byte[] attachmentBytes, String fileName) throws MessagingException {
+    public Boolean sendAttachmentMail(String[] to, String subject, String content,
+                                      byte[] attachmentBytes, String fileName) {
         log.info("发送字节附件邮件: 收件人={}, 主题={}, 内容={}", to, subject, content);
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        helper.setFrom(from);
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(content, true);
-        ByteArrayResource byteArrayResource = new ByteArrayResource(attachmentBytes);
-        helper.addAttachment(fileName, byteArrayResource);
-        mailSender.send(message);
-        log.info("邮件发送成功！");
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom(from);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(content, true);
+            ByteArrayResource byteArrayResource = new ByteArrayResource(attachmentBytes);
+            helper.addAttachment(fileName, byteArrayResource);
+            mailSender.send(message);
+        } catch (Exception e) {
+            log.error("邮件发送异常！", e);
+            return false;
+        }
+        return true;
     }
 
 }

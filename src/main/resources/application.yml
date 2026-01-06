@@ -9,6 +9,22 @@ spring:
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
+    # HikariCP 连接池配置（核心）
+    hikari:
+      # 最小空闲连接数（建议：CPU核心数*2）
+      minimum-idle: 10
+      # 最大连接数（关键！需根据业务压测调整，建议：CPU核心数*4 + 预留）
+      maximum-pool-size: 50
+      # 连接超时时间（获取连接的等待时间，建议30秒）
+      connection-timeout: 30000
+      # 空闲连接超时时间（释放空闲连接，建议10分钟）
+      idle-timeout: 600000
+      # 连接最大存活时间（避免长时间占用连接，建议30分钟）
+      max-lifetime: 1800000
+      # 检测泄露
+      leak-detection-threshold: 60000
+      # 连接池初始化失败是否抛异常
+      initialization-fail-timeout: 1
   application:
     name: boot-demo
   session:
@@ -46,6 +62,7 @@ spring:
 mybatis-plus:
   #mapper路径
   mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.lty.model.entity
   #mapper配置路径
   # config-location: classpath:static/mybatis/mybatis-config.xml
   global-config:

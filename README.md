@@ -338,11 +338,13 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
 
 
 
-注意websocket地址是ws://localhost:8088/api/ws     （后端地址+上下文路径+后缀）
+注意websocket地址是ws://localhost:8088/ws     （后端地址+上下文路径+后缀）
 
 
 
 ### 前端
+
+ 处理自动重连、心跳保活、消息缓存等
 
 ```plain
 <!DOCTYPE html>
@@ -351,38 +353,143 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
   <input type="text" id="messageInput" placeholder="输入消息">
   <button onclick="sendMessage()">发送</button>
   <div id="messages"></div>
+  
   <script>
-    // 创建 WebSocket 连接
-    const socket = new WebSocket('ws://localhost:8088/api/ws');
-    // 连接打开时触发
-    socket.addEventListener('open', () => {
-      logMessage('连接已建立');
-    });
-    // 接收消息时触发
-    socket.addEventListener('message', (event) => {
-      logMessage('收到消息: ' + event.data);
-    });
-    // 连接关闭时触发
-    socket.addEventListener('close', () => {
-      logMessage('连接已关闭');
-    });
-    // 错误处理
-    socket.addEventListener('error', (error) => {
-      logMessage('连接错误: ' + error.message);
-    });
-    // 发送消息
-    function sendMessage() {
-      const message = document.getElementById('messageInput').value;
-      socket.send(message);
-      logMessage('发送消息: ' + message);
+    // 配置项
+    const WS_CONFIG = {
+      url: 'ws://localhost:8088/ws',
+      reconnectInterval: 3000, // 重连间隔（毫秒）
+      heartbeatInterval: 10000, // 心跳间隔（毫秒）
+      maxReconnectAttempts: 10, // 最大重连次数
+    };
+
+    let socket = null;
+    let reconnectAttempts = 0; // 重连次数计数
+    let heartbeatTimer = null; // 心跳定时器
+    let messageQueue = []; // 断连时的消息缓存队列
+
+    // 初始化 WebSocket 连接
+    function initWebSocket() {
+      try {
+        socket = new WebSocket(WS_CONFIG.url);
+        
+        // 连接成功
+        socket.addEventListener('open', () => {
+          logMessage('✅ 连接已建立');
+          reconnectAttempts = 0; // 重置重连次数
+          startHeartbeat(); // 启动心跳
+          sendQueuedMessages(); // 发送缓存的消息
+        });
+
+        // 接收消息
+        socket.addEventListener('message', (event) => {
+          logMessage('📥 收到消息: ' + event.data);
+        });
+
+        // 连接关闭
+        socket.addEventListener('close', () => {
+          logMessage('❌ 连接已关闭');
+          stopHeartbeat(); // 停止心跳
+          reconnect(); // 触发重连
+        });
+
+        // 错误处理
+        socket.addEventListener('error', (error) => {
+          logMessage('⚠️ 连接错误: ' + (error.message || '未知错误'));
+          socket.close(); // 错误时主动关闭，触发重连
+        });
+      } catch (e) {
+        logMessage('💥 初始化失败: ' + e.message);
+        reconnect();
+      }
     }
+
+    // 重连逻辑
+    function reconnect() {
+      if (reconnectAttempts >= WS_CONFIG.maxReconnectAttempts) {
+        logMessage('🚫 达到最大重连次数，停止重连');
+        return;
+      }
+      reconnectAttempts++;
+      logMessage(`🔄 正在重连（第 ${reconnectAttempts} 次），${WS_CONFIG.reconnectInterval/1000} 秒后重试`);
+      
+      setTimeout(() => {
+        initWebSocket();
+      }, WS_CONFIG.reconnectInterval);
+    }
+
+    // 心跳保活（发送 ping，服务端需返回 pong 确认）
+    function startHeartbeat() {
+      stopHeartbeat(); // 先停止旧的定时器
+      heartbeatTimer = setInterval(() => {
+        if (socket.readyState === WebSocket.OPEN) {
+          socket.send('ping'); // 发送心跳包（可自定义格式）
+          // logMessage('📡 发送心跳包: ping');
+        }
+      }, WS_CONFIG.heartbeatInterval);
+    }
+
+    // 停止心跳
+    function stopHeartbeat() {
+      if (heartbeatTimer) {
+        clearInterval(heartbeatTimer);
+        heartbeatTimer = null;
+      }
+    }
+
+    // 发送消息（含断连缓存）
+    function sendMessage() {
+      const message = document.getElementById('messageInput').value.trim();
+      if (!message) {
+        logMessage('📝 消息不能为空');
+        return;
+      }
+
+      // 连接已打开，直接发送
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(message);
+        logMessage('📤 发送消息: ' + message);
+        document.getElementById('messageInput').value = ''; // 清空输入框
+      } else {
+        // 连接未打开，加入缓存队列
+        messageQueue.push(message);
+        logMessage('📦 连接未建立，消息已缓存: ' + message);
+        document.getElementById('messageInput').value = '';
+      }
+    }
+
+    // 发送缓存的消息
+    function sendQueuedMessages() {
+      if (messageQueue.length === 0) return;
+      logMessage(`📤 发送缓存的 ${messageQueue.length} 条消息`);
+      
+      messageQueue.forEach(msg => {
+        socket.send(msg);
+        logMessage('📤 发送缓存消息: ' + msg);
+      });
+      messageQueue = []; // 清空队列
+    }
+
     // 日志输出
     function logMessage(message) {
       const messagesDiv = document.getElementById('messages');
       const p = document.createElement('p');
-      p.textContent = message;
+      p.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
       messagesDiv.appendChild(p);
+      // 滚动到最新消息
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
+
+    // 页面卸载时关闭连接
+    window.addEventListener('beforeunload', () => {
+      stopHeartbeat();
+      if (socket) {
+        socket.close(1000, '页面关闭'); // 正常关闭
+      }
+    });
+
+    // 初始化连接
+    initWebSocket();
   </script>
 </body>
 </html>
