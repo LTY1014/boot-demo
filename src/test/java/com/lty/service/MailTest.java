@@ -1,6 +1,6 @@
 package com.lty.service;
 
-import com.lty.service.impl.MailService;
+import com.lty.util.bean.MailUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,14 +16,14 @@ import java.util.List;
 public class MailTest {
 
     @Resource
-    private MailService mailService;
+    private MailUtil mailUtil;
 
     @Test
     public void test() {
         File file = new File("C:\\Users\\Administrator\\Desktop\\1.xlsx");
         List<File> files = new ArrayList<>();
         files.add(file);
-        Boolean b = mailService.sendAttachmentMail(new String[]{"xxx@email.com"}, "主题", "内容", files);
+        Boolean b = mailUtil.sendAttachmentMail(new String[]{"xxx@email.com"}, "主题", "内容", files);
         System.out.println(b);
     }
 
@@ -44,6 +44,6 @@ public class MailTest {
                 "  <p>如有任何问题，请随时联系我们。</p>" +
                 "  <p>祝您使用愉快！</p>" +
                 "</div>";
-        mailService.sendHtmlMail(new String[]{userEmail}, subject, welcomeHtml);
+        mailUtil.sendHtmlMail(new String[]{userEmail}, subject, welcomeHtml);
     }
 }

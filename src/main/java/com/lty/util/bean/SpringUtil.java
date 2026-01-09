@@ -1,4 +1,4 @@
-package com.lty.util;
+package com.lty.util.bean;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

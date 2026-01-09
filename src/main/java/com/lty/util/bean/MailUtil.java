@@ -1,4 +1,4 @@
-package com.lty.service.impl;
+package com.lty.util.bean;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +22,7 @@ import java.util.List;
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "spring.mail.username")
-public class MailService {
+public class MailUtil {
 
     @Value("${spring.mail.username}")
     private String from;

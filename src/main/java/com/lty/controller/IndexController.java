@@ -8,16 +8,19 @@ import com.lty.common.ErrorCode;
 import com.lty.common.ResultUtils;
 import com.lty.exception.BusinessException;
 import com.lty.service.UserService;
+import com.lty.util.CommandUtil;
 import com.lty.util.IpInfoUtil;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author lty
@@ -103,4 +106,48 @@ public class IndexController {
         return ResultUtils.success(device);
     }
 
+    /**
+     * 示例1：执行Shell脚本（Linux/Mac）
+     */
+    @PostMapping("/execute-shell")
+    public String executeShellScript() {
+        try {
+            // 执行 /opt/test.sh 脚本（需替换为你的脚本路径）
+            List<String> command = List.of("/bin/bash", "/opt/test.sh");
+            String result = CommandUtil.executeCommand(command);
+            return "脚本执行成功：\n" + result;
+        } catch (Exception e) {
+            return "脚本执行失败：" + e.getMessage();
+        }
+    }
+
+    /**
+     * 示例2：执行简单系统命令（如查看Linux系统信息）
+     */
+    @PostMapping("/execute-system")
+    public String executeSystemCommand() {
+        try {
+            // 执行 ls -l 命令（查看当前目录文件）
+            List<String> command = List.of("ls", "-l");
+            String result = CommandUtil.executeCommand(command);
+            return "命令执行成功：\n" + result;
+        } catch (Exception e) {
+            return "命令执行失败：" + e.getMessage();
+        }
+    }
+
+    /**
+     * 示例3：执行Windows批处理脚本（Windows系统）
+     */
+    @PostMapping("/execute-bat")
+    public String executeBatScript() {
+        try {
+            // 执行 D:\test.bat 脚本
+            List<String> command = List.of("cmd", "/c", "D:\\test.bat");
+            String result = CommandUtil.executeCommand(command);
+            return "批处理执行成功：\n" + result;
+        } catch (Exception e) {
+            return "批处理执行失败：" + e.getMessage();
+        }
+    }
 }
