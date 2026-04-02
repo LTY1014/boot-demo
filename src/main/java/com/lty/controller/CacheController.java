@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -26,7 +26,7 @@ public class CacheController {
     @PostMapping("/stats")
     public BaseResponse<Map<String, String>> postCacheStats() {
         return ResultUtils.success(Map.of(
-                "hitRate", localUrlCache.stats().hitRate() * 100 + "%", // 缓存命中率
+                "hitRate", String.format("%.2f", localUrlCache.stats().hitRate() * 100) + "%", // 缓存命中率
                 "requestCount", String.valueOf(localUrlCache.stats().requestCount()), // 总请求数
                 "hitCount", String.valueOf(localUrlCache.stats().hitCount()),  // 命中数
                 "missCount", String.valueOf(localUrlCache.stats().missCount()), // 未命中数
@@ -44,11 +44,13 @@ public class CacheController {
     // 获取键
     @PostMapping("/getBatch")
     public BaseResponse<Map<String, String>> getCaches(@RequestBody List<String> keys) {
-        Map<String, String> res = keys.stream()
-                .collect(Collectors.toMap(
-                        key -> key,
-                        key -> localUrlCache.getIfPresent(key)
-                ));
+        Map<String, String> res = new HashMap<>();
+        keys.forEach(key -> {
+            String value = localUrlCache.getIfPresent(key);
+            if (value != null) {
+                res.put(key, value);
+            }
+        });
         return ResultUtils.success(res);
     }
 

@@ -733,6 +733,34 @@ public class AppTask implements ApplicationRunner, DisposableBean {
 
 
 
+## 多系统 Webhook 同步方案
+
+(主流程同步保证数据一致性，通知逻辑异步提升性能)
+
+
+
+- 测试方法
+
+```
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+public class WebhookTest {
+    @Autowired
+    private BizDataService bizDataService;
+
+    @Test
+    void testDataUpdateSync() {
+        // 调用业务更新 → 自动触发 B/C 系统同步
+        bizDataService.updateData(1001L, "测试业务数据", 1);
+    }
+}
+```
+
+
+
 ## 其他工具类
 
 | 工具类 | 功能 |
