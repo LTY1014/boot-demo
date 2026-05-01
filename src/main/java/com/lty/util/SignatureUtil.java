@@ -73,5 +73,9 @@ public class SignatureUtil {
         System.out.println(signContent);
         System.out.println("-----------");
         System.out.println(SignatureUtil.verifySignature(content, signContent, secretKey));
+        // 模拟数据被篡改的情况
+        String content2 = "hello world";
+        System.out.println("数据被篡改后验证结果:");
+        System.out.println(SignatureUtil.verifySignature(content2, signContent, secretKey));
     }
 }
