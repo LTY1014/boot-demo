@@ -58,6 +58,12 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- FreeMarker 模板引擎依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-freemarker</artifactId>
+        </dependency>
+
         <!-- ========================= 数据库相关 ========================== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
