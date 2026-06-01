@@ -14,8 +14,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 //@RunWith(SpringRunner.class)
 //@SpringBootTest
@@ -23,10 +26,80 @@ public class EasyExcelTest {
 
     @Test
     public void test() {
-        String filename = "D:\\Desktop\\test.xlsx";
-        List<Map<Integer, String>> totalList =
-                EasyExcel.read(filename).sheet().headRowNumber(0).doReadSync();
-        System.out.println(totalList);
+        String filename = "C:\\Users\\Administrator\\Desktop\\1.xlsx";
+        List<Map<Integer, String>> readList =
+                EasyExcel.read(filename).sheet("Sheet1").headRowNumber(0).doReadSync();
+        // 表头映射(表头不要重复)
+        Map<Integer, String> headerMapping = new HashMap<>();
+        // 结果集
+        List<Map<String, String>> resultList = new ArrayList<>();
+        if (readList != null && !readList.isEmpty()) {
+            headerMapping.putAll(readList.get(0));
+            for (Map<Integer, String> rowData : readList) {
+                Map<String, String> rowMap = new HashMap<>();
+                for (Map.Entry<Integer, String> entry : rowData.entrySet()) {
+                    String headerKey = headerMapping.get(entry.getKey());
+                    if (headerKey != null && !headerKey.trim().isEmpty()) {
+                        rowMap.put(headerKey, entry.getValue());
+                    }
+                }
+                // TODO 可添加校验逻辑是否加入结果集
+                resultList.add(rowMap);
+            }
+        }
+        System.out.println(resultList.size());
+    }
+
+    @Test
+    public void writeTest() {
+        // 表头映射
+        Map<Integer, String> headerMapping = new HashMap<>();
+        headerMapping.put(0, "序号");
+        headerMapping.put(1, "项目编号");
+        headerMapping.put(2, "项目名称");
+        // 结果集
+        List<Map<String, String>> resultList = new ArrayList<>();
+        resultList.add(new HashMap<String, String>() {{
+            put("序号", "1");
+            put("项目编号", "T-123456");
+            put("项目名称", "项目1");
+        }});
+        resultList.add(new HashMap<String, String>() {{
+            put("序号", "2");
+            put("项目编号", "T-123456");
+            put("项目名称", "项目2");
+        }});
+        // 输出文件路径（可自行修改）
+        String outputPath = "C:\\Users\\Administrator\\Desktop\\输出结果.xlsx";
+        String sheetName = "Sheet1";
+
+        // 1. 【关键】按列索引排序表头，保证列顺序和读取时完全一致，零错位
+        List<Map.Entry<Integer, String>> sortedHeader = headerMapping.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey()) // 按列索引升序排序
+                .collect(Collectors.toList());
+        // 2. 提取表头标题列表（Excel第一行）
+        List<List<String>> headerList = new ArrayList<>();
+        for (Map.Entry<Integer, String> entry : sortedHeader) {
+            headerList.add(Collections.singletonList(entry.getValue()));
+        }
+        // 3. 组装数据行：按表头顺序匹配值，保证列对应零错位
+        List<List<String>> dataList = new ArrayList<>();
+        for (Map<String, String> rowData : resultList) {
+            List<String> row = new ArrayList<>();
+            for (Map.Entry<Integer, String> header : sortedHeader) {
+                // 按表头标题匹配值，空值填空字符串，避免null
+                String value = rowData.getOrDefault(header.getValue(), "");
+                row.add(value);
+            }
+            dataList.add(row);
+        }
+        // 4. 【核心】EasyExcel写入Excel,自动关闭流
+        EasyExcel.write(outputPath)
+                .sheet(sheetName)
+                .head(headerList) // 写入表头
+                .doWrite(dataList); // 写入数据
+        System.out.println("✅ Excel写入完成！文件路径：" + outputPath);
+        System.out.println("✅ 共写入 " + headerList.size() + " 列，" + dataList.size() + " 行数据");
     }
 
     /**
