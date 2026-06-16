@@ -321,6 +321,159 @@ String device = ua.getBrowser() + " | " + ua.getPlatform() + " | " + (ua.isMobil
 
 
 
+## JCIFS
+
+- 导入依赖
+
+```plain
+        <!-- jcifs 访问SMB共享文件夹 -->
+        <dependency>
+            <groupId>jcifs</groupId>
+            <artifactId>jcifs</artifactId>
+            <version>1.3.17</version>
+            <scope>compile</scope>
+        </dependency>
+```
+
+
+
+
+
+- 工具类
+
+```plain
+package com.lty.util;
+
+import jcifs.smb.NtlmPasswordAuthentication;
+import jcifs.smb.SmbFile;
+import jcifs.smb.SmbFileInputStream;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+/**
+ * jcifs SMB工具类
+ */
+public class JcifsSmbUtil {
+
+    /**
+     * 获取认证对象
+     * @param domain 工作组填空字符串""，域环境填域名
+     * @param username Windows登录账号
+     * @param password Windows密码
+     * @return NtlmPasswordAuthentication
+     */
+    public static NtlmPasswordAuthentication getAuth(String domain, String username, String password) {
+        return new NtlmPasswordAuthentication(domain, username, password);
+    }
+
+    /**
+     * 遍历共享文件夹下所有文件
+     * @param smbUrl 共享路径格式：smb://192.168.1.100/共享文件夹名/
+     * @param auth 账号密码凭证
+     * @throws IOException
+     */
+    public static void listSmbDir(String smbUrl, NtlmPasswordAuthentication auth) throws IOException {
+        SmbFile smbDir = new SmbFile(smbUrl, auth);
+        if (!smbDir.exists()) {
+            System.out.println("共享目录不存在：" + smbUrl);
+            return;
+        }
+        if (!smbDir.isDirectory()) {
+            System.out.println("路径不是文件夹");
+            return;
+        }
+        SmbFile[] files = smbDir.listFiles();
+        for (SmbFile file : files) {
+            System.out.printf("文件名：%s，大小：%d byte%n", file.getName(), file.length());
+        }
+    }
+
+    /**
+     * 获取共享文件输入流，直接读取文件内容
+     * @param smbFileUrl smb完整文件路径
+     * @param auth 认证凭证
+     * @return 文件输入流
+     * @throws IOException
+     */
+    public static InputStream getFileInputStream(String smbFileUrl, NtlmPasswordAuthentication auth) throws IOException {
+        SmbFile smbFile = new SmbFile(smbFileUrl, auth);
+        if (!smbFile.exists() || smbFile.isDirectory()) {
+            throw new IOException("目标不存在或为文件夹：" + smbFileUrl);
+        }
+        return new SmbFileInputStream(smbFile);
+    }
+
+    /**
+     * 下载共享文件到本地磁盘
+     * @param smbFilePath smb文件地址
+     * @param localSavePath 本地保存路径
+     * @param auth 认证凭证
+     * @throws IOException
+     */
+    public static void downloadFileToLocal(String smbFilePath, String localSavePath, NtlmPasswordAuthentication auth) throws IOException {
+        try (InputStream in = getFileInputStream(smbFilePath, auth);
+             FileOutputStream out = new FileOutputStream(localSavePath)) {
+            byte[] buf = new byte[4096];
+            int len;
+            while ((len = in.read(buf)) != -1) {
+                out.write(buf, 0, len);
+            }
+        }
+    }
+
+    // 测试示例
+    public static void main(String[] args) {
+        // 服务端IP
+        String ip = "192.168.1.100";
+        // 工作组电脑domain填空，域环境填写域名
+        String domain = "";
+        String user = "Administrator";
+        String pwd = "123456";
+        // 共享文件夹路径
+        String sharePath = "smb://" + ip + "/共享文件/";
+        // 需要读取的文件
+        String targetFile = "smb://" + ip + "/共享文件/test.txt";
+
+        try {
+            NtlmPasswordAuthentication auth = getAuth(domain, user, pwd);
+            // 1. 遍历目录
+            listSmbDir(sharePath, auth);
+            // 2. 下载文件到本地
+            downloadFileToLocal(targetFile, "D:/test.txt", auth);
+            System.out.println("文件下载完成！");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+
+
+**扩展：SpringBoot 项目封装工具**
+
+可将`CIFSContext`做成 Bean，全局复用连接，避免重复认证：
+
+```plain
+@Bean
+public CIFSContext smbContext() {
+    return SmbFileUtil.getSmbContext("192.168.1.100", "", "admin", "123456");
+}
+```
+
+
+
+**权限配置要点（Windows 服务器）**
+
+1. 共享文件夹右键【共享】添加账号，赋予读取权限
+2. 安全选项卡添加同一账号，文件系统读取权限
+3. 关闭防火墙或放行 445 端口
+4. 来宾账户禁用时，必须使用有效 Windows 账号登录
+5. 仅支持 SMB1 协议(Windows 新版系统默认关闭 SMB1，会报连接失败)
+6. 
+
 ## 安全工具类
 
 ### PasswordUtil（密码加密）

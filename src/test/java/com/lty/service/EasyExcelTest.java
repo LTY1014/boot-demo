@@ -7,11 +7,19 @@ import com.lty.util.GrammarUtil;
 import com.lty.util.easyexcel.ExcelDataValidator;
 import com.lty.util.easyexcel.ExcelListener;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.junit.Test;
 
+import java.io.FileInputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -100,6 +108,83 @@ public class EasyExcelTest {
                 .doWrite(dataList); // 写入数据
         System.out.println("✅ Excel写入完成！文件路径：" + outputPath);
         System.out.println("✅ 共写入 " + headerList.size() + " 列，" + dataList.size() + " 行数据");
+    }
+
+    // 合并Excel单元格读取
+    @Test
+    public void mergeTest() throws Exception {
+        String excelFilePath = "C:\\Users\\Administrator\\Desktop\\1.xlsx";
+        List<String> headers = Arrays.asList("NO", "备注");
+
+        FileInputStream fis = new FileInputStream(excelFilePath);
+        Workbook workbook = WorkbookFactory.create(fis);
+        Sheet sheet = workbook.getSheetAt(0);
+
+        // key：行号，value：该行对应的B列合并值
+        Map<Integer, String> rowBValueMap = new HashMap<>();
+        List<CellRangeAddress> mergeList = sheet.getMergedRegions();
+
+        // 第一步：解析所有合并单元格，只处理B列（列索引1）
+        for (CellRangeAddress range : mergeList) {
+            int firstCol = range.getFirstColumn();
+            int lastCol = range.getLastColumn();
+            // 只匹配B列整列合并（首列末列都是1）
+            if (firstCol != 1 || lastCol != 1) {
+                continue;
+            }
+            int firstRow = range.getFirstRow();
+            int lastRow = range.getLastRow();
+            // 获取合并左上角单元格的值
+            Row headRow = sheet.getRow(firstRow);
+            Cell headCell = headRow.getCell(1);
+            String mergeText = getCellValue(headCell);
+            // 区间内所有行都存入同一个值
+            for (int r = firstRow; r <= lastRow; r++) {
+                rowBValueMap.put(r, mergeText);
+            }
+        }
+
+        // 第二步：逐行读取数据，自动回填B列值
+        List<Map<String, String>> result = new ArrayList<>();
+        for (int r = sheet.getFirstRowNum(); r <= sheet.getLastRowNum(); r++) {
+            // 跳过表头
+            if (r <= 1){
+                continue;
+            }
+            Row row = sheet.getRow(r);
+            if (row == null) continue;
+            Map<String, String> rowData = new HashMap<>();
+
+            for (int i = 0; i < headers.size(); i++) {
+                Cell cell = row.getCell(i);
+                // B列值优先使用回填的合并值
+                if (i == 1) {
+                    String bValue = rowBValueMap.getOrDefault(r, getCellValue(cell));
+                    rowData.put(headers.get(i), bValue);
+                } else {
+                    rowData.put(headers.get(i), getCellValue(cell));
+                }
+            }
+            result.add(rowData);
+        }
+        workbook.close();
+        fis.close();
+        // 输出结果，每行都有完整B列值
+        result.forEach(System.out::println);
+    }
+
+    // 获取单元格纯净文本
+    public static String getCellValue(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+
+        return switch (cell.getCellType()) {
+            // 数字类型格式化为字符串，避免科学计数法等问题
+            case NUMERIC -> String.valueOf(new DecimalFormat("#.##########").format(cell.getNumericCellValue()));
+            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
+            default -> cell.getStringCellValue().trim();
+        };
     }
 
     /**
