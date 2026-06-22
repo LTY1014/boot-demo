@@ -1,23 +1,19 @@
 package com.lty.controller;
 
 import com.alibaba.excel.EasyExcel;
-import com.lty.common.ErrorCode;
-import com.lty.exception.BusinessException;
 import com.lty.model.dto.ExcelDemo;
 import com.lty.model.dto.Person;
 import com.lty.model.entity.Book;
+import com.lty.util.ExcelPoiUtil;
 import com.lty.util.ExcelUtil;
 import com.lty.util.ServletUtil;
 import com.lty.util.easyexcel.ExcelDataValidator;
 import com.lty.util.easyexcel.ExcelListener;
-import com.lty.util.easyexcel.EasyExcelUtil;
 import io.swagger.annotations.ApiOperation;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,14 +23,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -87,65 +81,28 @@ public class ExcelController {
         }
     }
 
-    @ApiOperation(value = "导入到Excel(POI实现)", produces = "application/octet-stream")
+    @ApiOperation(value = "读取Excel(POI实现)", produces = "application/octet-stream")
     @PostMapping("/import")
     public List<Book> importBooksFromExcel(@RequestPart MultipartFile file) {
         List<Book> books = new ArrayList<>();
 
-        try (InputStream is = file.getInputStream()) {
-            Workbook workbook = new XSSFWorkbook(is);
+        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
-            int totalRows = sheet.getPhysicalNumberOfRows();
-
-            // 跳过表头
-            for (int i = 1; i < totalRows; i++) {
-                Row row = sheet.getRow(i);
-                if (row != null) {
-                    Book book = new Book();
-                    book.setId((long) row.getCell(0).getNumericCellValue());
-                    book.setBookName(row.getCell(1).getStringCellValue());
-                    books.add(book);
+            for (Row row : sheet) {
+                int rowNum = row.getRowNum();
+                // 跳过表头
+                if (rowNum == 0) {
+                    continue;
                 }
+                Book book = new Book();
+                book.setId((long) row.getCell(0).getNumericCellValue());
+                book.setBookName(row.getCell(1).getStringCellValue());
+                books.add(book);
             }
-            workbook.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        System.out.println("Imported books: " + books);
-        return books;
-    }
-
-    @ApiOperation(value = "导出到Excel(POI实现2)", produces = "application/octet-stream")
-    @RequestMapping(value = "/import2", method = RequestMethod.POST)
-    public List<Book> importBooksFromExcel2(@RequestPart MultipartFile file) {
-        List<Book> books = new ArrayList<>();
-
-        try (InputStream is = file.getInputStream()) {
-            Workbook workbook = new XSSFWorkbook(is);
-            Iterator<Sheet> sheetIterator = workbook.iterator();
-            String fileExtension = StringUtils.getFilenameExtension(file.getOriginalFilename());
-            if (!ObjectUtils.isEmpty(fileExtension) && !fileExtension.endsWith("xlsx") && !fileExtension.endsWith("xls")) {
-                throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件格式不正确，请上传xlsx或xls格式文件");
-            }
-            while (sheetIterator.hasNext()) {
-                Sheet sheet = sheetIterator.next();
-                Iterator<Row> rowIterator = sheet.rowIterator();
-                while (rowIterator.hasNext()) {
-                    Row row = rowIterator.next();
-                    // 跳过表头读取
-                    if (row.getRowNum() > 0) {
-                        Book book = new Book();
-                        book.setId((long) row.getCell(0).getNumericCellValue());
-                        book.setBookName(row.getCell(1).getStringCellValue());
-                        books.add(book);
-                    }
-                }
-            }
-            workbook.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         System.out.println("Imported books: " + books);
         return books;
     }
@@ -209,7 +166,7 @@ public class ExcelController {
     @ApiOperation(value = "导出Excel(EasyExcel工具实现)", produces = "application/octet-stream")
     @RequestMapping(value = "/easyexcel/util/export", method = RequestMethod.POST)
     public void easyexcelExportByUtil() throws IOException {
-        EasyExcelUtil.exportExcel(getExcelDemoList());
+        ExcelPoiUtil.exportExcel(getExcelDemoList(), "导出文件", "sheet1");
     }
 
     // 模拟ExcelDemo数据
