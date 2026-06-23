@@ -7,8 +7,6 @@ import com.lty.model.entity.Book;
 import com.lty.util.ExcelPoiUtil;
 import com.lty.util.ExcelUtil;
 import com.lty.util.ServletUtil;
-import com.lty.util.easyexcel.ExcelDataValidator;
-import com.lty.util.easyexcel.ExcelListener;
 import io.swagger.annotations.ApiOperation;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -146,18 +144,6 @@ public class ExcelController {
             EasyExcel.write(response.getOutputStream(), ExcelDemo.class)
                     .sheet("sheet1")
                     .doWrite(getExcelDemoList());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @ApiOperation(value = "导入Excel(EasyExcel实现)", produces = "application/octet-stream")
-    @RequestMapping(value = "/easyexcel/import", method = RequestMethod.POST)
-    public void easyexcelImport(@RequestPart MultipartFile file) {
-        // 写入输出流
-        ExcelListener excelListener = new ExcelListener(new ExcelDataValidator(), list -> System.out.println("模拟存储数据:" + list));
-        try {
-            EasyExcel.read(file.getInputStream(), ExcelDemo.class, excelListener).sheet(0).doRead();
         } catch (IOException e) {
             e.printStackTrace();
         }
