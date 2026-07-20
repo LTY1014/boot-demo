@@ -1,7 +1,9 @@
 package com.lty.util;
 
 import cn.hutool.crypto.digest.DigestUtil;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.InputStream;
 
 /**
@@ -40,6 +42,27 @@ public class BusinessFileUtil {
      */
     public static String getFileMd5(InputStream inputStream) throws Exception {
         return DigestUtil.md5Hex(inputStream);
+    }
+
+    /**
+     * 公共工具：将MultipartFile写入本地目标文件
+     * @param multipartFile 前端上传文件
+     * @param targetFile 本地保存文件对象
+     */
+    public static void saveMultipartFileToLocal(MultipartFile multipartFile, File targetFile) {
+        try (InputStream inputStream = multipartFile.getInputStream()) {
+            // 父目录不存在则创建
+            File parentDir = targetFile.getParentFile();
+            if (!parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+            // 创建文件（不存在才新建，已存在会覆盖）
+            targetFile.createNewFile();
+            // 文件落地
+            multipartFile.transferTo(targetFile);
+        } catch (Exception e) {
+            throw new RuntimeException("文件保存至本地失败，目标路径:" + targetFile.getAbsolutePath(), e);
+        }
     }
 
     public static void main(String[] args) {
