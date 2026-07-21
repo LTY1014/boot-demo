@@ -7,7 +7,9 @@ import com.lty.common.BaseResponse;
 import com.lty.common.ErrorCode;
 import com.lty.common.ResultUtils;
 import com.lty.exception.BusinessException;
+import com.lty.service.BasicCustomerService;
 import com.lty.service.UserService;
+import com.lty.util.BusinessFileUtil;
 import com.lty.util.CommandUtil;
 import com.lty.util.IpInfoUtil;
 import io.swagger.annotations.ApiOperation;
@@ -15,12 +17,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author lty
@@ -33,6 +41,9 @@ public class IndexController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private BasicCustomerService basicCustomerService;
 
 
     @ApiOperation(value = "默认")
@@ -149,5 +160,15 @@ public class IndexController {
         } catch (Exception e) {
             return "批处理执行失败：" + e.getMessage();
         }
+    }
+
+    @RequestMapping(value = "/config", method = RequestMethod.POST)
+    public BaseResponse<Map<String, String>> reloadFactoryConfig(@RequestPart(value = "file") MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "上传文件不能为空");
+        }
+        File jsonFile = new File(BasicCustomerService.JSON_FILE);
+        BusinessFileUtil.saveMultipartFileToLocal(file, jsonFile);
+        return ResultUtils.success(basicCustomerService.reloadFactoryConfig());
     }
 }

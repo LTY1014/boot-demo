@@ -26,10 +26,10 @@ import java.util.Map;
 public class BasicCustomerService {
 
     /** 客户型号 映射 */
-    private Map<String, String> customerMap = new HashMap<>();
+    private volatile Map<String, String> customerMap = new HashMap<>();
 
     /** 工厂配置 Key → 配置对象 映射 */
-    private Map<String, String> factoryConfigMap = new HashMap<>();
+    private volatile Map<String, String> factoryConfigMap = new HashMap<>();
 
     /** 持久化文件路径 */
     public static final String JSON_FILE = Paths.get(BaseConstant.PROJECT_ROOT_DIRECTORY, "project.json").toString();
@@ -65,9 +65,7 @@ public class BasicCustomerService {
             });
             factoryConfigMap = data != null ? data : new HashMap<>();
         } catch (Exception e) {
-            System.out.println("loadFactoryConfig error");
-            e.printStackTrace();
-            factoryConfigMap = new HashMap<>();
+            log.error("loadFactoryConfig error, 保留旧数据", e);
         }
     }
 
@@ -87,6 +85,11 @@ public class BasicCustomerService {
     }
 
     // ========== 客户型号映射 ==========
+
+    public Map<String, String> reloadCustomerMap() {
+        loadCustomerMap();
+        return getCustomerMap();
+    }
 
     /**
      * 从 Excel 文件加载客户型号映射
