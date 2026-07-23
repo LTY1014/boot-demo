@@ -25,13 +25,13 @@ public class CacheController {
     // 统计方法
     @PostMapping("/stats")
     public BaseResponse<Map<String, String>> postCacheStats() {
-        return ResultUtils.success(Map.of(
-                "hitRate", String.format("%.2f", localUrlCache.stats().hitRate() * 100) + "%", // 缓存命中率
-                "requestCount", String.valueOf(localUrlCache.stats().requestCount()), // 总请求数
-                "hitCount", String.valueOf(localUrlCache.stats().hitCount()),  // 命中数
-                "missCount", String.valueOf(localUrlCache.stats().missCount()), // 未命中数
-                "estimatedSize", String.valueOf(localUrlCache.estimatedSize()) // 当前大小
-        ));
+        Map<String, String> stats = new HashMap<>();
+        stats.put("hitRate", String.format("%.2f", localUrlCache.stats().hitRate() * 100) + "%"); // 缓存命中率
+        stats.put("requestCount", String.valueOf(localUrlCache.stats().requestCount()));  // 总请求数
+        stats.put("hitCount", String.valueOf(localUrlCache.stats().hitCount()));      // 命中数
+        stats.put("missCount", String.valueOf(localUrlCache.stats().missCount()));   // 未命中数
+        stats.put("estimatedSize", String.valueOf(localUrlCache.estimatedSize()));  // 当前大小
+        return ResultUtils.success(stats);
     }
 
     // 放入键

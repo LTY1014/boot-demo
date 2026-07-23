@@ -10,6 +10,7 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -58,7 +59,7 @@ public class CorsConfig implements WebMvcConfigurer {
                 "/webjars/**"
         };
 
-        List<HandlerInterceptor> interceptors = List.of(demoInterceptor);
+        List<HandlerInterceptor> interceptors = Arrays.asList(demoInterceptor);
         for (HandlerInterceptor interceptor : interceptors) {
             // 添加拦截器对象
             registry.addInterceptor(interceptor)

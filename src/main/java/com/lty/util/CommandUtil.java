@@ -20,7 +20,7 @@ public class CommandUtil {
     /**
      * 执行系统命令/脚本
      *
-     * @param command 命令列表（如执行shell脚本：List.of("/bin/bash", "/opt/test.sh")）
+     * @param command 命令列表（如执行shell脚本：Arrays.asList("/bin/bash", "/opt/test.sh")）
      * @param workDir 命令执行的工作目录（可为null，使用当前目录）
      * @return 命令执行结果（stdout）
      * @throws IOException          执行异常

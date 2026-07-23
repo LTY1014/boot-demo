@@ -1,7 +1,6 @@
 package com.lty.service;
 
 import com.lty.code.bean.Field;
-import com.lty.util.BaseUtil;
 import com.lty.util.GrammarUtil;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
@@ -16,6 +15,7 @@ import net.sf.jsqlparser.statement.values.ValuesStatement;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -79,7 +79,7 @@ public class JsqlparserTest {
     @Test
     public void test() throws Exception {
         try {
-            List<String> insertStatements = List.of(
+            List<String> insertStatements = Arrays.asList(
                     "INSERT INTO my_table (col1, col2) VALUES (1, 'a');",
                     "INSERT INTO my_table (col1, col2) VALUES (2, 'b');",
                     "INSERT INTO my_table (col1, col2) VALUES (3, 'c');"

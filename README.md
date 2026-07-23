@@ -551,7 +551,7 @@ boolean valid = SqlValidUtil.validSql("SELECT * FROM user WHERE id = 1");
 boolean valid = SqlValidUtil.validSqlTableName(sql, "ittr$");
 
 // 校验必须包含的列
-boolean valid = SqlValidUtil.validSqlColumn(sql, List.of("id", "name"));
+boolean valid = SqlValidUtil.validSqlColumn(sql, Arrays.asList("id", "name"));
 
 // 获取数据库名和表名
 List<String> schemaTable = SqlValidUtil.getSchemaTable(sql);  // [数据库, 表]
@@ -641,13 +641,13 @@ List<ApiInfo> apiInfoList = ApiInfoUtil.getApiInfoList(dto);
 
 ```java
 // 执行Shell脚本（Linux/Mac）
-String result = CommandUtil.executeCommand(List.of("/bin/bash", "/opt/test.sh"), "/workDir");
+String result = CommandUtil.executeCommand(Arrays.asList("/bin/bash", "/opt/test.sh"), "/workDir");
 
 // 执行系统命令
-String result = CommandUtil.executeCommand(List.of("ls", "-l"));
+String result = CommandUtil.executeCommand(Arrays.asList("ls", "-l"));
 
 // 执行批处理脚本（Windows）
-String result = CommandUtil.executeCommand(List.of("cmd", "/c", "D:\\test.bat"));
+String result = CommandUtil.executeCommand(Arrays.asList("cmd", "/c", "D:\\test.bat"));
 ```
 
 

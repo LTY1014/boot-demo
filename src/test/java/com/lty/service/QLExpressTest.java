@@ -9,6 +9,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +75,6 @@ public class QLExpressTest {
         String rule2 = "productType == 'ELECTRONICS' ? 50 : 0";
         // 规则3：VIP5用户再减100元
         String rule3 = "vipLevel == 5 ? 100 : 0";
-        return List.of(rule1,rule2,rule3);
+        return Arrays.asList(rule1,rule2,rule3);
     }
 }

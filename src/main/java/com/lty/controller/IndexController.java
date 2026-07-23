@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -124,7 +125,7 @@ public class IndexController {
     public String executeShellScript() {
         try {
             // 执行 /opt/test.sh 脚本（需替换为你的脚本路径）
-            List<String> command = List.of("/bin/bash", "/opt/test.sh");
+            List<String> command = Arrays.asList("/bin/bash", "/opt/test.sh");
             String result = CommandUtil.executeCommand(command);
             return "脚本执行成功：\n" + result;
         } catch (Exception e) {
@@ -139,7 +140,7 @@ public class IndexController {
     public String executeSystemCommand() {
         try {
             // 执行 ls -l 命令（查看当前目录文件）
-            List<String> command = List.of("ls", "-l");
+            List<String> command = Arrays.asList("ls", "-l");
             String result = CommandUtil.executeCommand(command);
             return "命令执行成功：\n" + result;
         } catch (Exception e) {
@@ -154,7 +155,7 @@ public class IndexController {
     public String executeBatScript() {
         try {
             // 执行 D:\test.bat 脚本
-            List<String> command = List.of("cmd", "/c", "D:\\test.bat");
+            List<String> command = Arrays.asList("cmd", "/c", "D:\\test.bat");
             String result = CommandUtil.executeCommand(command);
             return "批处理执行成功：\n" + result;
         } catch (Exception e) {
