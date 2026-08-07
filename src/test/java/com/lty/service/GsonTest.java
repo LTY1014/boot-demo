@@ -3,7 +3,7 @@ package com.lty.service;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.lty.model.entity.User;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;

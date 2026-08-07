@@ -2,7 +2,7 @@ package com.lty.service.java;
 
 import com.lty.model.entity.User;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Constructor;

@@ -6,6 +6,7 @@ import com.lty.annotation.AuthCheck;
 import com.lty.common.BaseResponse;
 import com.lty.common.ErrorCode;
 import com.lty.common.ResultUtils;
+import com.lty.constant.BaseConstant;
 import com.lty.exception.BusinessException;
 import com.lty.service.BasicCustomerService;
 import com.lty.service.UserService;
@@ -15,6 +16,7 @@ import com.lty.util.IpInfoUtil;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,10 +25,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -171,5 +181,46 @@ public class IndexController {
         File jsonFile = new File(BasicCustomerService.JSON_FILE);
         BusinessFileUtil.saveMultipartFileToLocal(file, jsonFile);
         return ResultUtils.success(basicCustomerService.reloadFactoryConfig());
+    }
+
+    /**
+     * 下载临时文件。文件发送完成（或发送失败）后会被删除。
+     */
+    @GetMapping("/file")
+    public void getFileStream(@RequestParam String name, HttpServletResponse response) throws IOException {
+        if (name.isBlank()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件名不能为空");
+        }
+        Path tempDirectory = Paths.get(BaseConstant.TEMP_DIRECTORY).toRealPath();
+        Path requestedPath = tempDirectory.resolve(name).normalize();
+        if (!requestedPath.startsWith(tempDirectory)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "非法文件路径");
+        }
+        final Path filePath;
+        try {
+            filePath = requestedPath.toRealPath();
+        } catch (NoSuchFileException e) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "文件不存在");
+        }
+        if (!filePath.startsWith(tempDirectory) || !Files.isRegularFile(filePath) || !Files.isReadable(filePath)) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "文件不存在或不可读取");
+        }
+        String downloadName = filePath.getFileName().toString();
+        String contentType = Files.probeContentType(filePath);
+        response.setContentType(contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        response.setContentLengthLong(Files.size(filePath));
+        String encodedFileName = UriUtils.encode(downloadName, StandardCharsets.UTF_8);
+        response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + encodedFileName);
+        response.setHeader("X-Content-Type-Options", "nosniff");
+        try {
+            Files.copy(filePath, response.getOutputStream());
+            response.flushBuffer();
+        } finally {
+            try {
+                Files.deleteIfExists(filePath);
+            } catch (IOException e) {
+                log.warn("临时文件删除失败：{}", filePath, e);
+            }
+        }
     }
 }

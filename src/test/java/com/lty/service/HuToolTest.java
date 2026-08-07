@@ -8,7 +8,7 @@ import cn.hutool.json.JSONUtil;
 import cn.hutool.system.SystemUtil;
 import com.lty.model.dto.Person;
 import com.lty.util.ServletUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;

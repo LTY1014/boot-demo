@@ -1,11 +1,11 @@
 package com.lty.service;
 
 import com.lty.util.QLExpress.QLExpressService;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 public class QLExpressTest {
 
@@ -29,7 +29,7 @@ public class QLExpressTest {
         paramMap.put("b", 5);
         paramMap.put("c", 2);
         Object o = qlExpressService.executeExpression(expression, paramMap);
-        Assert.assertEquals(30, o);
+        Assertions.assertEquals(30, o);
     }
 
     @Test

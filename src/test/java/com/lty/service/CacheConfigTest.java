@@ -1,10 +1,11 @@
 package com.lty.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
@@ -12,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 缓存配置测试
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 public class CacheConfigTest {
 
@@ -36,7 +37,7 @@ public class CacheConfigTest {
         // 2. 测试获取缓存
         String value = localUrlCache.getIfPresent("testKey");
         System.out.println("获取缓存值：" + value);
-        assert "testValue".equals(value) : "缓存值不匹配";
+        Assertions.assertEquals("testValue", value, "缓存值不匹配");
         
         System.out.println("✓ 缓存读取成功");
     }

@@ -4,7 +4,7 @@ import com.lty.model.dto.api.ApiInfo;
 import com.lty.model.dto.api.ApiInfoDTO;
 import com.lty.util.ApiInfoUtil;
 import com.lty.util.ServletUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openapi4j.parser.OpenApi3Parser;
 import org.openapi4j.parser.model.v3.OpenApi3;
 

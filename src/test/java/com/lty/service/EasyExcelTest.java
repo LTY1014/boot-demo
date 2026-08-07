@@ -5,7 +5,7 @@ import com.alibaba.excel.support.ExcelTypeEnum;
 import com.lty.model.dto.ExcelDemo;
 import com.lty.util.GrammarUtil;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

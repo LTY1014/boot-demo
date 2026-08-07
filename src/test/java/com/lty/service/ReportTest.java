@@ -1,10 +1,10 @@
 package com.lty.service;
 
 import net.sf.jasperreports.engine.*;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.InputStream;
 import java.sql.Connection;
@@ -14,7 +14,7 @@ import java.util.Map;
 
 // 假设存在Person类和其他必要的类和资源
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 public class ReportTest {
 
