@@ -2,6 +2,9 @@ package com.lty.controller;
 
 import cn.hutool.http.useragent.UserAgent;
 import cn.hutool.http.useragent.UserAgentUtil;
+import com.deepoove.poi.XWPFTemplate;
+import com.deepoove.poi.config.Configure;
+import com.deepoove.poi.plugin.table.LoopRowTableRenderPolicy;
 import com.lty.annotation.AuthCheck;
 import com.lty.common.BaseResponse;
 import com.lty.common.ErrorCode;
@@ -32,12 +35,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -222,5 +227,51 @@ public class IndexController {
                 log.warn("临时文件删除失败：{}", filePath, e);
             }
         }
+    }
+
+    @PostMapping("/word")
+    public void renderWord(HttpServletResponse response) {
+        Map<String, Object> data = new HashMap<>();
+        // 绑定普通文字
+        data.put("title", "月度合同统计报告");
+        // data.put("createTime", LocalDateTime.now()
+        //         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        // 绑定图片
+        // data.put("companyLogo", Pictures.ofLocal("D:\\Downloads\\user.png").size(240, 80).create());
+        data.put("showNotice", false);
+
+        // 动态表格渲染
+        /*
+        *
+        | {{items}}序号 | 商品名称 | 数量  |
+        | ------------- | -------- | ----- |
+        | [index]       | [name]   | [num] |
+        *
+        * */
+        Configure config = Configure.builder()
+                .bind("items", new LoopRowTableRenderPolicy())
+                .build();
+        List<Map<String,String>> items = buildItem();
+        data.put("items", items);
+
+        try (InputStream is = getClass().getResourceAsStream("/模板.docx");
+             XWPFTemplate template = XWPFTemplate.compile(is,config).render(data)) {
+            response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            response.setHeader("Content-Disposition", "attachment;filename=report.docx");
+            template.write(response.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private List<Map<String,String>> buildItem() {
+        List<Map<String,String>> items = new java.util.ArrayList<>();
+        for (int i = 1; i <= 5; i++) {
+            Map<String,String> item = new java.util.HashMap<>();
+            item.put("name", "Item " + i);
+            item.put("num", String.valueOf(i));
+            items.add(item);
+        }
+        return items;
     }
 }
