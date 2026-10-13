@@ -20,7 +20,6 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -63,21 +62,21 @@ public class IndexController {
 
 
     @ApiOperation(value = "默认")
-    @GetMapping(value = "/")
+    @RequestMapping(value = "/", method = RequestMethod.GET)
     public BaseResponse<String> index() {
         log.info("index() called with parameters => ");
         return ResultUtils.success("success");
     }
 
     @ApiOperation(value = "失败", response = ResultUtils.class)
-    @GetMapping("/fail")
+    @RequestMapping(value = "/fail", method = RequestMethod.GET)
     public BaseResponse error() {
         log.info("error() called with parameters => ");
         return ResultUtils.error(ErrorCode.PARAMS_ERROR, "参数失败");
     }
 
     @ApiOperation(value = "参数请求")
-    @GetMapping("/hello")
+    @RequestMapping(value = "/hello", method = RequestMethod.GET)
     public BaseResponse<String> hello(@RequestParam(value = "name", required = false) String name) {
         String str = "hello," + name;
         log.info("hello() called with parameters => [name = {}]", name);
@@ -86,7 +85,7 @@ public class IndexController {
 
     @AuthCheck(anyRole = {"admin", "test", "user"})
     @ApiOperation(value = "资源页")
-    @GetMapping("/resource")
+    @RequestMapping(value = "/resource", method = RequestMethod.GET)
     public BaseResponse<String> resource() {
         if (userService.getLoginUser().getId() < 0) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
@@ -96,7 +95,7 @@ public class IndexController {
 
     @AuthCheck(mustRole = "admin")
     @ApiOperation(value = "管理员资源页")
-    @GetMapping("/adminResource")
+    @RequestMapping(value = "/adminResource", method = RequestMethod.GET)
     public BaseResponse<String> adminResource() {
         if (!userService.isAdmin()) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
@@ -105,26 +104,26 @@ public class IndexController {
     }
 
     @ApiOperation(value = "获取端口号")
-    @GetMapping("/getPort")
+    @RequestMapping(value = "/getPort", method = RequestMethod.GET)
     public BaseResponse<String> getPort() {
         String str = "当前端口为: " + port;
         return ResultUtils.success(str);
     }
 
     @ApiOperation(value = "获取IP")
-    @GetMapping("/getIp")
+    @RequestMapping(value = "/getIp", method = RequestMethod.GET)
     public BaseResponse<String> getIp(HttpServletRequest request) {
         return ResultUtils.success(IpInfoUtil.getIpAddress(request));
     }
 
     @ApiOperation(value = "获取ClientIP")
-    @GetMapping("/getClientIp")
+    @RequestMapping(value = "/getClientIp", method = RequestMethod.GET)
     public BaseResponse<String> getClientIp(String ip) {
         return ResultUtils.success(IpInfoUtil.getClient(ip));
     }
 
     @ApiOperation(value = "获取设备信息")
-    @GetMapping("/device")
+    @RequestMapping(value = "/device", method = RequestMethod.GET)
     public BaseResponse<String> device(HttpServletRequest request) {
         // 利用Hutool的UserAgentUtil来解析User-Agent
         UserAgent ua = UserAgentUtil.parse(request.getHeader("user-agent"));
@@ -136,7 +135,7 @@ public class IndexController {
     /**
      * 示例1：执行Shell脚本（Linux/Mac）
      */
-    @PostMapping("/execute-shell")
+    @RequestMapping(value = "/execute-shell", method = RequestMethod.POST)
     public String executeShellScript() {
         try {
             // 执行 /opt/test.sh 脚本（需替换为你的脚本路径）
@@ -151,7 +150,7 @@ public class IndexController {
     /**
      * 示例2：执行简单系统命令（如查看Linux系统信息）
      */
-    @PostMapping("/execute-system")
+    @RequestMapping(value = "/execute-system", method = RequestMethod.POST)
     public String executeSystemCommand() {
         try {
             // 执行 ls -l 命令（查看当前目录文件）
@@ -166,7 +165,7 @@ public class IndexController {
     /**
      * 示例3：执行Windows批处理脚本（Windows系统）
      */
-    @PostMapping("/execute-bat")
+    @RequestMapping(value = "/execute-bat", method = RequestMethod.POST)
     public String executeBatScript() {
         try {
             // 执行 D:\test.bat 脚本
@@ -191,7 +190,7 @@ public class IndexController {
     /**
      * 下载临时文件。文件发送完成（或发送失败）后会被删除。
      */
-    @GetMapping("/file")
+    @RequestMapping(value = "/file", method = RequestMethod.GET)
     public void getFileStream(@RequestParam String name, HttpServletResponse response) throws IOException {
         if (name.isBlank()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件名不能为空");

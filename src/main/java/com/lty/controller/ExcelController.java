@@ -4,7 +4,6 @@ import com.alibaba.excel.EasyExcel;
 import com.lty.model.dto.ExcelDemo;
 import com.lty.model.dto.Person;
 import com.lty.model.entity.Book;
-import com.lty.util.ExcelPoiUtil;
 import com.lty.util.ExcelUtil;
 import com.lty.util.ServletUtil;
 import io.swagger.annotations.ApiOperation;
@@ -152,7 +151,7 @@ public class ExcelController {
     @ApiOperation(value = "导出Excel(EasyExcel工具实现)", produces = "application/octet-stream")
     @RequestMapping(value = "/easyexcel/util/export", method = RequestMethod.POST)
     public void easyexcelExportByUtil() throws IOException {
-        ExcelPoiUtil.exportExcel(getExcelDemoList(), "导出文件", "sheet1");
+        ExcelUtil.exportExcel(getExcelDemoList(), "导出文件", "sheet1");
     }
 
     // 模拟ExcelDemo数据
